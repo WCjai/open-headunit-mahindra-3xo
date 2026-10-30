@@ -1,4 +1,4 @@
-# Open Headunit for Mahindra XUV 3XO (TopWay head unit)
+# Open Headunit for Mahindra XUV 3XO MX2(TopWay head unit)
 
 A car-specific build of [Open Headunit](https://github.com/andreknieriem/open-headunit) for the
 TopWay Android head unit fitted in a Mahindra XUV 3XO. It turns the head unit into a USB Android
