@@ -77,7 +77,18 @@ bridge, radio, steering wheel) will not work on them.
 - An Android phone with the **Android Auto** app (built in on Android 10 and newer).
 - A good USB data cable. Many charge-only cables do not carry data.
 - A USB pen drive (FAT32 or exFAT), or a PC with `adb` for the developer route.
-- The app's APK file. Build it yourself ([Building from source](#building-from-source)) or use one from this repository's Releases page, if one is published.
+- The app's APK file from the [Releases](https://github.com/WCjai/open-headunit-mahindra-3xo/releases) page, or build it yourself ([Building from source](#building-from-source)).
+
+### Which APK to download
+
+| File | Use it when |
+|---|---|
+| `OpenHeadunit-3XO-<version>.apk` | **Production build.** Use this in the car. Optimised and signed with this project's release key, so later releases install as updates. |
+| `OpenHeadunit-3XO-<version>-debug.apk` | **Debug build.** For testing and bug reports. Same features, signed with a debug key. |
+
+Both builds use the same app id but different signatures, so Android will not install one over
+the other. To switch, export your settings (**Head Unit Settings → Backup → Export settings**),
+uninstall the app, install the other APK and import the settings again.
 
 ## Installation
 
@@ -86,7 +97,7 @@ bridge, radio, steering wheel) will not work on them.
 
 ### Option A: from a USB pen drive (recommended)
 
-1. Copy `OpenHeadunit-TopWay.apk` to the root of a USB pen drive on your PC.
+1. Copy the APK (for example `OpenHeadunit-3XO-1.0.0.apk`) to the root of a USB pen drive on your PC.
 2. With the car on, plug the pen drive into the head unit's USB port.
 3. Open the unit's **File Manager**, go to the USB drive and tap the APK.
 4. If Android asks, allow installing apps from this source (**Settings → Install unknown apps → File Manager → Allow**), then go back and tap the APK again.
@@ -112,7 +123,7 @@ The unit's USB ports are in **host** mode, so a PC cannot see the unit until a p
 
    ```sh
    adb devices
-   adb install -r OpenHeadunit-TopWay.apk
+   adb install -r OpenHeadunit-3XO-1.0.0.apk
    # optional, makes the app start faster on this slow CPU:
    adb shell cmd package compile -m speed -f com.andrerinas.headunitrevived
    ```
@@ -265,7 +276,7 @@ Tested on Windows 11. Linux and macOS work the same with `./gradlew`.
    ```properties
    sdk.dir=C\:\\Users\\you\\AppData\\Local\\Android\\Sdk
    ```
-4. Build the car APK:
+4. Build the **debug** APK:
    ```sh
    # Windows
    set JAVA_HOME=C:\path\to\jdk-17
@@ -274,14 +285,41 @@ Tested on Windows 11. Linux and macOS work the same with `./gradlew`.
    ./gradlew assembleGithubDebug -PcarFast=true
    ```
    `-PcarFast=true` makes the build non-debuggable, so it runs at full speed on the head unit while
-   keeping the debug signing key.
-5. The APK is at
-   `app/build/outputs/apk/github/debug/com.andrerinas.headunitrevived_4.0.0-alpha_debug.apk`.
-   Rename it to `OpenHeadunit-TopWay.apk` and install it as described in [Installation](#installation).
+   keeping the debug signing key. The APK is in `app/build/outputs/apk/github/debug/`.
+5. Build the **production** APK (needs a signing key, see below):
+   ```sh
+   gradlew.bat assembleGithubRelease        # Windows
+   ./gradlew assembleGithubRelease          # Linux / macOS
+   ```
+   The APK is in `app/build/outputs/apk/github/release/`. This build is shrunk and optimised.
+6. Install it as described in [Installation](#installation).
 
-> **Signing.** Debug builds are signed with the debug key of the PC that built them. An APK built
-> on a different PC cannot be installed over this one; uninstall first (settings are lost unless
-> exported under **Backup**).
+**Signing key for production builds.** Create a keystore once and keep it safe. Every later
+release must be signed with the same key, or it will not install as an update.
+
+```sh
+keytool -genkeypair -v -keystore my-release.jks -alias my-key -keyalg RSA -keysize 4096 -validity 10000
+```
+
+Then create `key.properties` in the project folder (it is git-ignored, never commit it):
+
+```properties
+storeFile=C:/path/to/my-release.jks
+storePassword=your-store-password
+keyAlias=my-key
+keyPassword=your-key-password
+```
+
+Without `key.properties` the production build is produced unsigned and cannot be installed.
+
+> **Debug signing.** Debug builds are signed with the debug key of the PC that built them. An APK
+> built on a different PC cannot be installed over this one; uninstall first (settings are lost
+> unless exported under **Backup**).
+>
+> **OneDrive on Windows.** Do not build from a folder synced by OneDrive. Its "files on demand"
+> placeholders break the native (CMake) part of the production build with
+> `Cannot snapshot ... libavcodec.so: not a regular file`. Clone into a normal folder such as
+> `C:\dev` instead.
 
 ## Getting updates from the original project
 
