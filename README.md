@@ -106,30 +106,77 @@ uninstall the app, install the other APK and import the settings again.
 
 ### Option B: with adb (developers)
 
-The unit's USB ports are in **host** mode, so a PC cannot see the unit until a port is switched to
-**device** mode with a hidden code.
+Use this route only if you are comfortable with adb. It needs three things on the head unit:
+developer options, USB debugging, and a USB port switched to **device** mode. TopWay protects
+the first two with passwords and the third with a hidden code.
 
-> ⚠️ **Read this first.** The code box used below is the **factory reset** box. Typing exactly
-> `7890` there **wipes the head unit**. Typing `7890` followed only by the customer ID opens a
-> flashing dialog; close it. Type the full code in one go and double-check it before confirming.
+> ⚠️ **Three different code boxes, three different meanings. Read before typing anything.**
+>
+> | Where | Code | What it does |
+> |---|---|---|
+> | **Developer options** password box | `7890` | Opens developer options. Safe. |
+> | **USB debugging** password box | `john@tw-desktopt3` | Turns USB debugging on. Safe. |
+> | **Car settings → Reset factory** box | `7890` **on its own** | **Wipes the head unit (factory reset).** Never type it there. |
+>
+> The same number `7890` is safe in the first box and destructive in the third. Always check
+> which box you are typing into.
 
-1. On the unit open **Settings → Car settings** and tap the **Reset factory** entry to get the code box.
-2. Enter `7890` + the current time as `HHMM` (24-hour, the unit's clock) + your customer ID in hex.
-   For example, at 14:05 on a unit with customer ID `1A2` the code is `789014051A2`.
-3. Choose **device** in the menu that opens. The port the PC is connected to now works for adb.
-4. Enable **Developer options** and **USB debugging** in the unit's Android settings. On this
-   firmware the USB debugging switch asks for the password `john@tw-desktopt3`.
-5. Connect the PC with a USB A-to-A cable (or the unit's USB extension) and install:
+#### Step 1: Enable Developer options
+
+1. Open the unit's Android **Settings** (home menu → **Android Settings**).
+2. Tap **Developer options**. It is near the bottom of the list, or under **System** on some firmware.
+   This firmware hides the usual "tap Build number seven times" entry and asks for a password instead.
+3. A password box titled **Developer options** opens. Type `7890` and tap **OK**.
+   A few TopWay customer builds use a different code here. If `7890` is rejected, ask your seller.
+4. The developer options page opens.
+
+#### Step 2: Enable USB debugging
+
+1. In **Developer options**, turn on **USB debugging**.
+2. A password box opens. Type `john@tw-desktopt3` exactly (lower case, with the `@` and the
+   hyphen) and tap **OK**.
+3. Confirm Android's own "Allow USB debugging?" message if it appears.
+
+You need to do steps 1 and 2 only once; they stay on after a reboot.
+
+#### Step 3: Switch a USB port to device mode
+
+The head unit's USB ports are in **host** mode (that is how phones and pen drives work), so a PC
+cannot see the unit yet. A hidden code in the factory-reset box switches the port to **device** mode
+until the next reboot.
+
+You need your unit's **customer ID**: a short hexadecimal number that TopWay assigns to each
+firmware build. **If you do not know it, stop here and use [Option A](#option-a-from-a-usb-pen-drive-recommended).**
+
+1. Open Android **Settings → Car settings** and tap **Reset factory**. A code box opens.
+2. Type `7890`, then the unit's current time as `HHMM` (24-hour clock, as shown on the unit),
+   then your customer ID in **upper-case** hex, all in one go. For example, at 14:05 on a unit with
+   customer ID `1A2` the code is `789014051A2`.
+3. Tap **OK** within the same minute (the time is checked when you tap OK).
+   - A wrong code that starts with `7890` and has more digits does nothing. Try again.
+   - `7890` **with nothing after it wipes the unit.** Never tap OK on just `7890` here.
+   - `7890` followed only by the customer ID (no time) opens a **system update / flashing** dialog.
+     Tap **Cancel** on it.
+4. A list with **device**, **host** and **null** appears. Tap **device**.
+
+#### Step 4: Install with adb
+
+1. Connect the PC to the head unit's USB port with a USB A-to-A cable (or the unit's USB extension
+   cable plus an adapter).
+2. Run:
 
    ```sh
-   adb devices
+   adb devices                       # the unit should be listed as "device"
    adb install -r OpenHeadunit-3XO-1.0.0.apk
    # optional, makes the app start faster on this slow CPU:
    adb shell cmd package compile -m speed -f com.andrerinas.headunitrevived
    ```
 
-6. Rebooting the unit returns the port to host mode, which is what Android Auto needs. Do not reboot
-   it over adb unless you mean to lose the connection.
+3. Accept the "Allow USB debugging from this computer?" prompt on the unit the first time.
+4. Restart the car (or reboot the unit) when you are done. The port goes back to **host** mode,
+   which Android Auto needs. `adb reboot` does the same, but the adb connection is lost with it.
+
+> While the port is in device mode, a phone plugged into it will not start Android Auto.
 
 ## First-time setup (step by step)
 
