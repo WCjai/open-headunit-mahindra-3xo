@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The tvOS home's Android Auto card. It carries every id of view_home_primary_card, so HomeFragment's
+    connection logic, countdown and fit keep driving it unchanged; the "tv" tag tells
+    HomeUiHelper.applyPrimaryCard to paint it in the glass style (paintTvCard).
+
+    Header: "Android Auto" and a chip with the connection (Cable, Wireless). Middle: a ringed phone,
+    which pulses green while a phone is connected, the title and the subtitle. Bottom: the one
+    action, full width.
+-->
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/home_primary_card"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/tv_card_bg"
+    android:tag="tv"
+    android:focusable="true">
+
+    <LinearLayout
+        android:id="@+id/home_primary_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:paddingLeft="26dp"
+        android:paddingRight="26dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="22dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="24dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                style="@style/TvText.Kicker"
+                android:text="@string/tv_android_auto" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <LinearLayout
+                android:id="@+id/tv_aa_chip"
+                android:layout_width="wrap_content"
+                android:layout_height="24dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/tv_pill_bg"
+                android:paddingLeft="10dp"
+                android:paddingRight="11dp">
+
+                <ImageView
+                    android:id="@+id/tv_aa_chip_icon"
+                    android:layout_width="13dp"
+                    android:layout_height="13dp"
+                    android:layout_marginRight="6dp"
+                    android:importantForAccessibility="no"
+                    app:srcCompat="@drawable/ic_usb_white" />
+
+                <TextView
+                    android:id="@+id/home_primary_kicker"
+                    style="@style/TvText"
+                    android:maxLines="1"
+                    android:textSize="12sp"
+                    android:fontFamily="@font/inter_semibold" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <!-- The ring: a faint outer circle, the ring proper, its pulse, and the disc with the phone
+                 (or the reconnect countdown) in it. -->
+            <FrameLayout
+                android:layout_width="148dp"
+                android:layout_height="148dp"
+                android:layout_marginBottom="12dp">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/tv_ring_faint" />
+
+                <View
+                    android:id="@+id/tv_aa_pulse"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="8dp"
+                    android:background="@drawable/tv_ring_pulse"
+                    android:visibility="invisible" />
+
+                <View
+                    android:id="@+id/tv_aa_ring"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="8dp"
+                    android:background="@drawable/tv_ring_bg" />
+
+                <FrameLayout
+                    android:id="@+id/tv_aa_disc"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="16dp"
+                    android:background="@drawable/tv_disc_glass">
+
+                    <ImageView
+                        android:id="@+id/tv_aa_icon"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_gravity="center"
+                        android:importantForAccessibility="no"
+                        app:srcCompat="@drawable/tv_ic_phone" />
+
+                    <TextView
+                        android:id="@+id/home_countdown"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:fontFamily="@font/inter_light"
+                        android:textColor="@color/tv_white"
+                        android:textSize="44sp"
+                        android:visibility="gone" />
+
+                </FrameLayout>
+
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/home_primary_title"
+                style="@style/TvText"
+                android:layout_width="match_parent"
+                android:gravity="center"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:textSize="26sp"
+                android:fontFamily="@font/inter_semibold"
+                android:letterSpacing="-0.02" />
+
+            <TextView
+                android:id="@+id/home_primary_subtitle"
+                style="@style/TvText"
+                android:layout_width="match_parent"
+                android:layout_marginTop="7dp"
+                android:gravity="center"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:textSize="15sp"
+                android:fontFamily="@font/inter_medium"
+                android:textColor="@color/tv_white_70" />
+
+            <TextView
+                android:id="@+id/home_primary_detail"
+                style="@style/TvText"
+                android:layout_width="match_parent"
+                android:layout_marginTop="4dp"
+                android:gravity="center"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textSize="13sp"
+                android:textColor="@color/tv_white_60"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:id="@+id/home_primary_progress"
+                android:layout_width="220dp"
+                android:layout_height="5dp"
+                android:layout_marginTop="12dp"
+                android:orientation="horizontal"
+                android:importantForAccessibility="no"
+                android:visibility="gone">
+
+                <FrameLayout
+                    android:id="@+id/home_primary_progress_fill"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
+
+                    <View
+                        android:id="@+id/home_primary_progress_shine"
+                        android:layout_width="@dimen/home_progress_shine_width"
+                        android:layout_height="match_parent" />
+
+                </FrameLayout>
+
+                <View
+                    android:id="@+id/home_primary_progress_rest"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/home_primary_actions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/home_primary_action"
+                android:layout_width="0dp"
+                android:layout_height="54dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="@drawable/tv_wide_glass_btn_bg"
+                android:fontFamily="@font/inter_semibold"
+                android:textColor="@color/tv_white"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/home_primary_cancel"
+                android:layout_width="wrap_content"
+                android:layout_height="54dp"
+                android:layout_marginLeft="10dp"
+                android:gravity="center"
+                android:maxLines="1"
+                android:paddingLeft="22dp"
+                android:paddingRight="22dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="@drawable/tv_wide_glass_btn_bg"
+                android:text="@string/cancel"
+                android:fontFamily="@font/inter_semibold"
+                android:textColor="@color/tv_white"
+                android:textSize="16sp"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Painted and hidden by the shared helpers; the tvOS card shows its own icon and the top bar
+         already shows the time. Kept so those helpers find what they look for. -->
+    <FrameLayout
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone">
+        <FrameLayout
+            android:id="@+id/home_primary_icon_tile"
+            android:layout_width="0dp"
+            android:layout_height="0dp">
+            <ImageView
+                android:id="@+id/home_primary_icon"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:importantForAccessibility="no" />
+        </FrameLayout>
+    </FrameLayout>
+
+</FrameLayout>

@@ -102,6 +102,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.andrerinas.openheadunit.app.ServiceStarts
 
 class SettingsFragment : Fragment() {
     private lateinit var settings: Settings
@@ -688,7 +689,7 @@ class SettingsFragment : Fragment() {
                 val stopServiceIntent = Intent(requireContext(), AapService::class.java).apply {
                     action = AapService.ACTION_STOP_SERVICE
                 }
-                ContextCompat.startForegroundService(requireContext(), stopServiceIntent)
+                ServiceStarts.start(requireContext(), stopServiceIntent)
             }
         }
 
@@ -1632,9 +1633,9 @@ class SettingsFragment : Fragment() {
             ))
         }
 
-        // Self Mode is the only mode where the phone's call screen and the projection share a
-        // screen, so it is the only mode this can do anything in.
-        if (settings.showsSelf()) {
+        // Self Mode is where the phone's call screen and the projection share a screen. A TopWay unit
+        // is the other case: its own Bluetooth app opens its call screen over the projection.
+        if (settings.showsSelf() || App.provide(requireContext()).topwayCallBridge.isAvailable) {
             items.add(SettingItem.ToggleSettingEntry(
                 stableId = "raiseProjectionDuringCall",
                 nameResId = R.string.raise_projection_during_call,
@@ -1646,6 +1647,18 @@ class SettingsFragment : Fragment() {
                     updateSettingsList()
                 }
             ))
+            // On a TopWay unit the projection comes back from the background, which Android 10+
+            // allows only with "Display over other apps". Without it the return silently does nothing.
+            if (App.provide(requireContext()).topwayCallBridge.isAvailable) {
+                val overlayAllowed = AppPermissions.isOverlayGranted(requireContext())
+                items.add(SettingItem.SettingEntry(
+                    stableId = "topwayOverlayPermission",
+                    nameResId = R.string.topway_overlay_row,
+                    value = getString(if (overlayAllowed) R.string.topway_overlay_allowed else R.string.topway_overlay_not_allowed),
+                    searchKeywords = "display over other apps overlay call screen topway return",
+                    onClick = { _ -> openOverlayPermissionSettings() }
+                ))
+            }
         }
 
         // --- More Features Settings ---
@@ -3529,7 +3542,7 @@ class SettingsFragment : Fragment() {
             val stopServiceIntent = Intent(ctx, AapService::class.java).apply {
                 action = AapService.ACTION_STOP_SERVICE
             }
-            ContextCompat.startForegroundService(ctx, stopServiceIntent)
+            ServiceStarts.start(ctx, stopServiceIntent)
         }
 
         hasChanges = false
@@ -3747,7 +3760,7 @@ class SettingsFragment : Fragment() {
             val stopServiceIntent = Intent(ctx, AapService::class.java).apply {
                 action = AapService.ACTION_STOP_SERVICE
             }
-            ContextCompat.startForegroundService(ctx, stopServiceIntent)
+            ServiceStarts.start(ctx, stopServiceIntent)
         }
 
         hasChanges = false
@@ -5284,5 +5297,24 @@ class SettingsFragment : Fragment() {
                 }
             )
         }
+    }
+
+    /** Opens Android's "Display over other apps" page for this app, with fallbacks for ROMs that lack it. */
+    private fun openOverlayPermissionSettings() {
+        val ctx = requireContext()
+        val pkg = android.net.Uri.parse("package:${ctx.packageName}")
+        val attempts = listOf(
+            Intent(android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION, pkg),
+            Intent(android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION),
+            Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS, pkg),
+        )
+        for (intent in attempts) {
+            try {
+                startActivity(intent)
+                return
+            } catch (_: Exception) {
+            }
+        }
+        ToastUtils.showToast(ctx, R.string.topway_overlay_needed, Toast.LENGTH_LONG, force = true)
     }
 }

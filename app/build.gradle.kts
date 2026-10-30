@@ -188,6 +188,12 @@ android {
 
         getByName("debug") {
             // debugging setup
+
+            // For the car: `-PcarFast=true` keeps the debug build's code, signing and native
+            // libraries (it installs over a debug build and keeps its settings) but marks the app
+            // not debuggable, so ART runs it at full speed instead of in debug mode. No shrinking:
+            // the TopWay integration reaches framework classes by reflection.
+            if (project.findProperty("carFast") == "true") isDebuggable = false
         }
     }
 

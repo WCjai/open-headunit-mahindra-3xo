@@ -10,7 +10,24 @@ internal class OutputBufferPolicy(
     private val floorFrames = ((minimumFrames.toLong() + burstFrames - 1) / burstFrames * burstFrames).toInt()
     // A device with 20ms bursts already needs 60ms for two HAL bursts plus staging. The
     // old 60ms ceiling left it no response to an xrun. Keep two growth steps above its floor.
-    val maximumFrames = maxOf(floorFrames + 2 * burstFrames, sampleRate * 60 / 1000 / burstFrames * burstFrames)
+    //
+    // A floor above 60ms means the platform refused the fast mixer, typically because the track's
+    // rate is not the HAL's (measured on a TopWay/Allwinner unit: "AUDIO_OUTPUT_FLAG_FAST denied,
+    // rates do not match 48000 Hz, require 44100 Hz", floor 6240 frames). That path resamples in
+    // the normal mixer and is scheduled coarsely, and two 10ms steps were spent within 300ms while
+    // underruns kept climbing, so the output stayed choppy until the stream was rebuilt. Give such
+    // a floor half its own size again as headroom.
+    val maximumFrames = maxOf(
+        floorFrames + 2 * burstFrames,
+        sampleRate * 60 / 1000 / burstFrames * burstFrames,
+        slowPathCeiling(sampleRate, burstFrames, floorFrames),
+    )
+
+    private fun slowPathCeiling(sampleRate: Int, burstFrames: Int, floorFrames: Int): Int {
+        if (floorFrames <= sampleRate * 60 / 1000) return 0
+        val wanted = floorFrames.toLong() * 3 / 2
+        return ((wanted + burstFrames - 1) / burstFrames * burstFrames).toInt()
+    }
     var stableFloorFrames = floorFrames
         private set
     var targetFrames = floorFrames

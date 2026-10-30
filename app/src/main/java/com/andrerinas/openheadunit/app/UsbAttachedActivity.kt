@@ -8,7 +8,6 @@ import android.hardware.usb.UsbManager
 import android.os.Bundle
 import android.os.UserManager
 import android.os.Build
-import android.widget.Toast
 import androidx.core.content.ContextCompat
 import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.R
@@ -31,7 +30,6 @@ import com.andrerinas.openheadunit.utils.LocaleHelper
 import com.andrerinas.openheadunit.main.MainActivity
 import com.andrerinas.openheadunit.main.SettingsActivity
 import com.andrerinas.openheadunit.utils.Settings
-import com.andrerinas.openheadunit.utils.ToastUtils
 
 class UsbAttachedActivity : Activity() {
 
@@ -136,7 +134,7 @@ class UsbAttachedActivity : Activity() {
                 return
             }
             AppLog.i("Usb in accessory mode and has permission. Starting AapService.")
-            ContextCompat.startForegroundService(this, Intent(this, AapService::class.java).apply {
+            ServiceStarts.start(this, Intent(this, AapService::class.java).apply {
                 action = AapService.ACTION_CHECK_USB
             })
             finish()
@@ -223,7 +221,7 @@ class UsbAttachedActivity : Activity() {
 
         val usbMode = UsbAccessoryMode(usbManager)
         AppLog.i("Switching USB device to accessory mode " + deviceCompat.uniqueName)
-        ToastUtils.showToast(this, getString(R.string.switching_usb_accessory_mode, deviceCompat.uniqueName), Toast.LENGTH_SHORT)
+        // No "Switching USB..." / "Success" toasts: on the car they only sit over Android Auto starting.
         val useLibusb = settings?.useLibusb ?: false
         // The claim keeps the service's 2 s attach fallback off a device we are already switching.
         // noHistory means this activity can be finished out from under the thread, so the release
@@ -240,10 +238,7 @@ class UsbAttachedActivity : Activity() {
                 ConnectionArbiter.release(arbiterClaim, sessionFormed = false)
             }
             runOnUiThread {
-                if (result) {
-                    ToastUtils.showToast(this, getString(R.string.success), Toast.LENGTH_SHORT)
-                } else {
-                    ToastUtils.showToast(this, getString(R.string.failed), Toast.LENGTH_SHORT)
+                if (!result) {
                     if (!App.provide(this).commManager.isConnected) ConnectionStageTracker.clear()
                 }
                 finish()
@@ -257,7 +252,7 @@ class UsbAttachedActivity : Activity() {
      */
     private fun handOffToService() {
         try {
-            ContextCompat.startForegroundService(this, Intent(this, AapService::class.java).apply {
+            ServiceStarts.start(this, Intent(this, AapService::class.java).apply {
                 action = AapService.ACTION_CHECK_USB
             })
         } catch (e: Exception) {

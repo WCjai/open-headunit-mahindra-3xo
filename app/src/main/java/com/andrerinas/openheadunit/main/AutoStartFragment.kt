@@ -36,6 +36,7 @@ import com.andrerinas.openheadunit.utils.ToastUtils
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.andrerinas.openheadunit.app.ServiceStarts
 
 class AutoStartFragment : Fragment() {
     private lateinit var settings: Settings
@@ -263,7 +264,7 @@ class AutoStartFragment : Fragment() {
         // Start the foreground service immediately when wake-detection settings
         // are enabled so it can register the dynamic SCREEN_ON receiver.
         if (settings.autoStartOnScreenOn || settings.autoStartOnBoot) {
-            ContextCompat.startForegroundService(requireContext(),
+            ServiceStarts.start(requireContext(),
                 Intent(requireContext(), AapService::class.java))
         }
 

@@ -1,0 +1,602 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The tvOS home (ui/tvos_dashboard.html): glass cards over soft indigo, blue and pink light.
+
+    Top bar: the menu (Android Settings, Head Unit Settings, Bluetooth), the time and date, and
+    Bluetooth and Wi-Fi status. Three columns under it: Now Playing, the Android Auto card, and
+    App Library over Radio.
+
+    The Android Auto card is view_tv_aa_card, which carries view_home_primary_card's ids, so
+    HomeFragment's connection logic, countdown and status keep driving it unchanged.
+    BentoHomeController binds the rest.
+-->
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/bento_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.andrerinas.openheadunit.main.bento.TvAmbientView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:importantForAccessibility="no" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingLeft="18dp"
+        android:paddingRight="18dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="18dp">
+
+        <!-- Top bar -->
+        <LinearLayout
+            android:id="@+id/bento_top_bar"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingRight="6dp">
+
+            <ImageView
+                android:id="@+id/bento_menu_button"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:padding="9dp"
+                android:background="@drawable/tv_icon_btn_bg"
+                android:clickable="true"
+                android:focusable="true"
+                android:contentDescription="@string/tv_menu"
+                app:srcCompat="@drawable/tv_ic_menu" />
+
+            <TextView
+                android:id="@+id/bento_clock"
+                style="@style/TvText"
+                android:layout_marginLeft="12dp"
+                android:textSize="21sp"
+                android:fontFamily="@font/inter_semibold" />
+
+            <View
+                android:layout_width="5dp"
+                android:layout_height="5dp"
+                android:layout_marginLeft="14dp"
+                android:layout_marginRight="14dp"
+                android:background="@drawable/tv_dot" />
+
+            <TextView
+                android:id="@+id/bento_date"
+                style="@style/TvText"
+                android:textSize="14sp"
+                android:fontFamily="@font/inter_medium"
+                android:textColor="@color/tv_white_80" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <ImageView
+                android:id="@+id/bento_status_bt"
+                android:layout_width="21dp"
+                android:layout_height="21dp"
+                app:srcCompat="@drawable/tv_ic_bluetooth" />
+
+            <ImageView
+                android:id="@+id/bento_status_wifi"
+                android:layout_width="21dp"
+                android:layout_height="21dp"
+                android:layout_marginLeft="18dp"
+                app:srcCompat="@drawable/tv_ic_wifi" />
+
+        </LinearLayout>
+
+        <!-- The grid -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal"
+            android:baselineAligned="false">
+
+            <!-- Now Playing: Android Auto's song while projecting, else the car's radio or Bluetooth audio -->
+            <LinearLayout
+                android:id="@+id/bento_music_card"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:background="@drawable/tv_card_bg"
+                android:clickable="true"
+                android:focusable="true"
+                android:paddingLeft="24dp"
+                android:paddingRight="24dp"
+                android:paddingTop="20dp"
+                android:paddingBottom="18dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="24dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        style="@style/TvText.Kicker"
+                        android:text="@string/tv_now_playing" />
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_weight="1" />
+
+                    <LinearLayout
+                        android:id="@+id/bento_music_chip"
+                        android:layout_width="wrap_content"
+                        android:layout_height="24dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:background="@drawable/tv_pill_bg"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="11dp">
+
+                        <ImageView
+                            android:id="@+id/bento_music_source_icon"
+                            android:layout_width="12dp"
+                            android:layout_height="12dp"
+                            android:layout_marginRight="6dp"
+                            android:importantForAccessibility="no"
+                            app:srcCompat="@drawable/tv_ic_bluetooth" />
+
+                        <TextView
+                            android:id="@+id/bento_music_source"
+                            style="@style/TvText"
+                            android:maxLines="1"
+                            android:textSize="12sp"
+                            android:fontFamily="@font/inter_semibold" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <FrameLayout
+                        android:layout_width="140dp"
+                        android:layout_height="140dp">
+
+                        <com.google.android.material.imageview.ShapeableImageView
+                            android:id="@+id/bento_music_art"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/tv_album_placeholder"
+                            android:scaleType="centerCrop"
+                            android:importantForAccessibility="no"
+                            app:shapeAppearanceOverlay="@style/ShapeAppearance.Tv.Art" />
+
+                        <ImageView
+                            android:id="@+id/bento_music_art_icon"
+                            android:layout_width="56dp"
+                            android:layout_height="56dp"
+                            android:layout_gravity="center"
+                            android:alpha="0.5"
+                            android:importantForAccessibility="no"
+                            app:srcCompat="@drawable/tv_ic_music" />
+
+                    </FrameLayout>
+
+                    <TextView
+                        android:id="@+id/bento_music_title"
+                        style="@style/TvText"
+                        android:layout_width="match_parent"
+                        android:layout_marginTop="16dp"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:textSize="24sp"
+                        android:fontFamily="@font/inter_bold"
+                        android:letterSpacing="-0.02" />
+
+                    <TextView
+                        android:id="@+id/bento_music_artist"
+                        style="@style/TvText"
+                        android:layout_width="match_parent"
+                        android:layout_marginTop="5dp"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:textSize="15sp"
+                        android:fontFamily="@font/inter_medium"
+                        android:textColor="@color/tv_white_70" />
+
+                    <!-- Android Auto only: the phone reports where the song is -->
+                    <LinearLayout
+                        android:id="@+id/bento_music_progress_row"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:id="@+id/bento_music_elapsed"
+                            style="@style/TvText"
+                            android:textSize="12sp"
+                            android:fontFamily="@font/inter_medium"
+                            android:textColor="@color/tv_white_60" />
+
+                        <ProgressBar
+                            android:id="@+id/bento_music_progress"
+                            style="?android:attr/progressBarStyleHorizontal"
+                            android:layout_width="0dp"
+                            android:layout_height="5dp"
+                            android:layout_weight="1"
+                            android:layout_marginLeft="12dp"
+                            android:layout_marginRight="12dp"
+                            android:max="1000"
+                            android:progressDrawable="@drawable/tv_progress" />
+
+                        <TextView
+                            android:id="@+id/bento_music_remaining"
+                            style="@style/TvText"
+                            android:textSize="12sp"
+                            android:fontFamily="@font/inter_medium"
+                            android:textColor="@color/tv_white_60" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/bento_music_controls"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <ImageView
+                            android:id="@+id/bento_music_prev"
+                            style="@style/TvIconButton"
+                            android:contentDescription="@string/tv_previous"
+                            app:srcCompat="@drawable/tv_ic_skip_previous" />
+
+                        <FrameLayout
+                            android:id="@+id/bento_music_play"
+                            android:layout_width="62dp"
+                            android:layout_height="62dp"
+                            android:layout_marginLeft="30dp"
+                            android:layout_marginRight="30dp"
+                            android:background="@drawable/tv_white_circle_bg"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:contentDescription="@string/tv_play_pause">
+
+                            <ImageView
+                                android:id="@+id/bento_music_play_icon"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:layout_gravity="center"
+                                android:importantForAccessibility="no"
+                                app:srcCompat="@drawable/tv_ic_play_pause"
+                                app:tint="@color/tv_black" />
+
+                        </FrameLayout>
+
+                        <ImageView
+                            android:id="@+id/bento_music_next"
+                            style="@style/TvIconButton"
+                            android:contentDescription="@string/tv_next"
+                            app:srcCompat="@drawable/tv_ic_skip_next" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Android Auto: HomeFragment's own connection card, in the tvOS style -->
+            <include
+                layout="@layout/view_tv_aa_card"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1.2"
+                android:layout_marginLeft="14dp" />
+
+            <!-- App Library over Radio -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.8"
+                android:layout_marginLeft="14dp"
+                android:orientation="vertical">
+
+                <FrameLayout
+                    android:id="@+id/bento_tile_more"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/tv_card_bg"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:contentDescription="@string/tv_app_library">
+
+                    <ImageView
+                        android:layout_width="84dp"
+                        android:layout_height="84dp"
+                        android:layout_gravity="center"
+                        android:alpha="0.75"
+                        android:importantForAccessibility="no"
+                        app:srcCompat="@drawable/tv_ic_app_grid" />
+
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/bento_tile_radio"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:layout_marginTop="14dp"
+                    android:background="@drawable/tv_card_bg"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:contentDescription="@string/tv_radio">
+
+                    <ImageView
+                        android:layout_width="90dp"
+                        android:layout_height="90dp"
+                        android:layout_gravity="center"
+                        android:alpha="0.75"
+                        android:importantForAccessibility="no"
+                        app:srcCompat="@drawable/tv_ic_radio_outline" />
+
+                </FrameLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- HomeFragment holds these as lateinit fields and its painters look them up. The tvOS home
+         does not show them; the Android Auto card and the menu do their jobs. -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone">
+        <LinearLayout android:id="@+id/usb_button" android:layout_width="0dp" android:layout_height="0dp" />
+        <LinearLayout android:id="@+id/wifi_button" android:layout_width="0dp" android:layout_height="0dp" />
+        <LinearLayout android:id="@+id/self_mode_button" android:layout_width="0dp" android:layout_height="0dp" />
+        <LinearLayout android:id="@+id/settings_button" android:layout_width="0dp" android:layout_height="0dp" />
+        <LinearLayout android:id="@+id/exit_button" android:layout_width="0dp" android:layout_height="0dp" />
+        <LinearLayout android:id="@+id/apps_button" android:layout_width="0dp" android:layout_height="0dp" />
+    </LinearLayout>
+
+    <!-- The menu: a tap outside closes it -->
+    <FrameLayout
+        android:id="@+id/bento_menu_scrim"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="true"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:id="@+id/bento_menu"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="18dp"
+            android:layout_marginTop="62dp"
+            android:orientation="vertical"
+            android:background="@drawable/tv_menu_bg"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
+            android:elevation="16dp">
+
+            <LinearLayout
+                android:id="@+id/bento_menu_android_settings"
+                style="@style/TvMenuItem">
+                <ImageView
+                    style="@style/TvMenuIcon"
+                    app:srcCompat="@drawable/tv_ic_settings"
+                    app:tint="@color/tv_accent_green" />
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                    <TextView style="@style/TvMenuTitle" android:text="@string/tv_menu_android_settings" />
+                    <TextView style="@style/TvMenuSubtitle" android:text="@string/tv_menu_android_settings_detail" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginLeft="18dp"
+                android:layout_marginRight="18dp"
+                android:background="@color/tv_white_10" />
+
+            <LinearLayout
+                android:id="@+id/bento_menu_headunit_settings"
+                style="@style/TvMenuItem">
+                <ImageView
+                    style="@style/TvMenuIcon"
+                    app:srcCompat="@drawable/tv_ic_sliders"
+                    app:tint="@color/tv_accent_red" />
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                    <TextView style="@style/TvMenuTitle" android:text="@string/tv_menu_headunit_settings" />
+                    <TextView style="@style/TvMenuSubtitle" android:text="@string/tv_menu_headunit_settings_detail" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginLeft="18dp"
+                android:layout_marginRight="18dp"
+                android:background="@color/tv_white_10" />
+
+            <LinearLayout
+                android:id="@+id/bento_menu_bluetooth"
+                style="@style/TvMenuItem">
+                <ImageView
+                    style="@style/TvMenuIcon"
+                    app:srcCompat="@drawable/tv_ic_bluetooth"
+                    app:tint="@color/tv_accent_blue" />
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                    <TextView style="@style/TvMenuTitle" android:text="@string/tv_menu_bluetooth" />
+                    <TextView style="@style/TvMenuSubtitle" android:text="@string/tv_menu_bluetooth_detail" />
+                </LinearLayout>
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+    <!-- A call on the car's Bluetooth: shown over the home, answered or ended here -->
+    <FrameLayout
+        android:id="@+id/bento_call_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/tv_scrim"
+        android:clickable="true"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="680dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/tv_call_card_bg"
+            android:paddingLeft="36dp"
+            android:paddingRight="36dp"
+            android:paddingTop="30dp"
+            android:paddingBottom="30dp">
+
+            <TextView
+                android:id="@+id/bento_call_avatar"
+                android:layout_width="104dp"
+                android:layout_height="104dp"
+                android:gravity="center"
+                android:background="@drawable/tv_avatar_bg"
+                android:fontFamily="@font/inter_semibold"
+                android:textColor="@color/tv_white"
+                android:textSize="38sp"
+                android:importantForAccessibility="no" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginLeft="26dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/bento_call_state"
+                    style="@style/TvText.Kicker"
+                    android:textColor="@color/tv_white_70" />
+
+                <TextView
+                    android:id="@+id/bento_call_name"
+                    style="@style/TvText"
+                    android:layout_width="match_parent"
+                    android:layout_marginTop="8dp"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:textSize="32sp"
+                    android:fontFamily="@font/inter_semibold" />
+
+                <TextView
+                    android:id="@+id/bento_call_number"
+                    style="@style/TvText"
+                    android:layout_width="match_parent"
+                    android:layout_marginTop="6dp"
+                    android:maxLines="1"
+                    android:textSize="16sp"
+                    android:textColor="@color/tv_white_70" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/bento_call_hangup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center_horizontal"
+                android:clickable="true"
+                android:focusable="true"
+                android:contentDescription="@string/bento_hang_up">
+
+                <FrameLayout
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
+                    android:background="@drawable/tv_decline_bg"
+                    android:duplicateParentState="true">
+                    <ImageView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_gravity="center"
+                        android:importantForAccessibility="no"
+                        app:srcCompat="@drawable/ic_bento_call_end" />
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/bento_call_hangup_label"
+                    style="@style/TvText"
+                    android:layout_marginTop="8dp"
+                    android:textSize="13sp"
+                    android:fontFamily="@font/inter_medium"
+                    android:textColor="@color/tv_white_70" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/bento_call_answer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="24dp"
+                android:orientation="vertical"
+                android:gravity="center_horizontal"
+                android:clickable="true"
+                android:focusable="true"
+                android:contentDescription="@string/bento_answer">
+
+                <FrameLayout
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
+                    android:background="@drawable/tv_answer_bg"
+                    android:duplicateParentState="true">
+                    <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_gravity="center"
+                        android:importantForAccessibility="no"
+                        app:srcCompat="@drawable/ic_bento_call" />
+                </FrameLayout>
+
+                <TextView
+                    style="@style/TvText"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/bento_answer"
+                    android:textSize="13sp"
+                    android:fontFamily="@font/inter_medium"
+                    android:textColor="@color/tv_white_70" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+</FrameLayout>

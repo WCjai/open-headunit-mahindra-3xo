@@ -25,6 +25,7 @@ import android.content.Intent
 import android.media.audiofx.AcousticEchoCanceler
 import android.media.audiofx.AutomaticGainControl
 import android.media.audiofx.NoiseSuppressor
+import com.andrerinas.openheadunit.app.ServiceStarts
 
 class MicSettingsFragment : Fragment() {
     private lateinit var settings: Settings
@@ -130,7 +131,7 @@ class MicSettingsFragment : Fragment() {
                 val stopServiceIntent = Intent(requireContext(), AapService::class.java).apply {
                     action = AapService.ACTION_STOP_SERVICE
                 }
-                ContextCompat.startForegroundService(requireContext(), stopServiceIntent)
+                ServiceStarts.start(requireContext(), stopServiceIntent)
             }
         }
 

@@ -123,6 +123,7 @@ import com.andrerinas.openheadunit.utils.ScreenPower
 import com.andrerinas.openheadunit.utils.Settings
 import com.andrerinas.openheadunit.utils.VpnControl
 import com.andrerinas.openheadunit.utils.protoUint32ToLong
+import com.andrerinas.openheadunit.app.ServiceStarts
 
 /**
  * Top-level foreground service that manages the Android Auto connection lifecycle.
@@ -502,6 +503,7 @@ class AapService : Service() {
 
     private fun onAaPresentationClosed(session: AaPresentationSession) {
         if (!isDestroying && aaPresentationSession === session) clearAaPresentationMetadata()
+        com.andrerinas.openheadunit.main.bento.AaNowPlaying.clear()
         // Keep the last playback state until onDisconnected records resume intent. A new
         // session resets it on its first update even if that state-flow emission was skipped.
     }
@@ -522,6 +524,13 @@ class AapService : Service() {
     private fun onAaMediaMetadataFromPhone(meta: MediaPlayback.MediaMetaData, session: AaPresentationSession) {
         if (!acceptPresentationSession(session)) return
         lastAaMediaMetadata = meta
+        // The home screen's music card reads this, whatever the media-session preference says.
+        com.andrerinas.openheadunit.main.bento.AaNowPlaying.setTrack(
+            if (meta.hasSong()) meta.song else "", if (meta.hasArtist()) meta.artist else ""
+        )
+        if (meta.hasDurationSeconds()) {
+            com.andrerinas.openheadunit.main.bento.AaNowPlaying.setDuration(meta.durationSeconds.protoUint32ToLong() * 1000L)
+        }
         if (!shouldSyncAaMediaMetadata()) return
         // Avoid showing a previous track's art with new title/artist until decode finishes.
         cachedAaAlbumArtBitmap = null
@@ -532,10 +541,12 @@ class AapService : Service() {
         if (!acceptPresentationSession(session)) return
         if (status.hasPlaybackSeconds()) {
             lastAaPlaybackPositionMs = status.playbackSeconds.protoUint32ToLong() * 1000L
+            com.andrerinas.openheadunit.main.bento.AaNowPlaying.setPosition(lastAaPlaybackPositionMs)
         }
         val isPlayingFromStatus = resolveIsPlayingFromStatus(status)
         lastAaPlaybackIsPlaying = isPlayingFromStatus
         mediaSessionIsPlaying = isPlayingFromStatus
+        com.andrerinas.openheadunit.main.bento.AaNowPlaying.setPlaying(isPlayingFromStatus)
 
         if (!shouldSyncAaMediaMetadata()) return
         updateMediaSessionState(isPlayingFromStatus)
@@ -606,6 +617,7 @@ class AapService : Service() {
     }
 
     private fun applyAaMediaMetadataToSession(meta: MediaPlayback.MediaMetaData, albumArt: Bitmap?) {
+        com.andrerinas.openheadunit.main.bento.AaNowPlaying.setAlbumArt(albumArt)
         if (!shouldSyncAaMediaMetadata()) return
         if (mediaSession == null) return
         val title = when {
@@ -1196,7 +1208,12 @@ class AapService : Service() {
         // Before wireless, not after. A device the USB rules accept starts a switch here, and
         // initWifiModeWithOptionalWait() then stands back for it; one they reject stakes nothing
         // and wireless arms as it always did.
-        usbLauncherManager.checkAlreadyConnected()
+        // A phone left plugged in while the unit was off is already on the bus when Android starts,
+        // so no attach event ever reaches us and it sat there until it was unplugged and plugged
+        // back in. Just after boot, treat it as the plug-in the system never announced.
+        val justBooted = SystemClock.elapsedRealtime() < BOOT_USB_WINDOW_MS
+        usbLauncherManager.checkAlreadyConnected(force = justBooted)
+        if (justBooted) scheduleBootUsbRescans()
 
         if (applyBootLoopGuard()) {
             AppLog.w("AapService: Wireless bring-up paused by the boot-loop guard. USB and the rest of the app are unaffected.")
@@ -1437,6 +1454,10 @@ class AapService : Service() {
 
     private fun onConnected() {
         usbLauncherManager.setSwitchingToProjection(false)
+        // The handshake first, and straight onto its IO thread (UNDISPATCHED skips a trip through
+        // the main queue). Nothing below feeds it, and on a slow head unit the main thread can be
+        // busy for seconds while the home starts; the phone was left waiting that long.
+        serviceScope.launch(start = kotlinx.coroutines.CoroutineStart.UNDISPATCHED) { commManager.startHandshake() }
         updateNotification()
         // Whatever the transport, the wake-up loop has nothing left to do. Event driven rather
         // than left to the loop's own 15 s poll. A wireless session also marks the P2P group as
@@ -1454,6 +1475,8 @@ class AapService : Service() {
 
         // Activate session-scoped car key receivers (e.g. FYT)
         carKeysManager.onSessionStarted(this)
+        // TopWay: calls run through the unit's own Bluetooth module (no-op elsewhere)
+        App.provide(this).topwayCallBridge.onSessionStarted()
 
         // Reactivate the existing MediaSession (created in onCreate, kept alive across disconnects)
         val shouldActivate = shouldActivateMediaSession()
@@ -1479,8 +1502,6 @@ class AapService : Service() {
         AppLog.i("AapService: Starting GpsLocationService and NightModeManager since connection is established")
         startService(GpsLocationService.intent(this))
         nightModeManager?.start()
-
-        serviceScope.launch { commManager.startHandshake() }
     }
 
     /**
@@ -1488,6 +1509,8 @@ class AapService : Service() {
      *   there is no overlay permission. False on the call path, where it would compete with the
      *   call screen's own full-screen intent.
      */
+    private var overlayNoticeShown = false
+
     private fun launchAapProjectionActivity(allowNotificationFallback: Boolean = true): Boolean {
         if (App.isPiPActive) {
             AppLog.i("AapService: Skipping projection launch because PiP is active")
@@ -1538,7 +1561,15 @@ class AapService : Service() {
                         "is a notification the user has to tap. Turn that permission on to have it " +
                         "come up by itself.")
                     launchProjectionViaNotification(intent)
-                } else AppLog.w("AapService: No overlay permission, not raising the projection")
+                } else {
+                    AppLog.w("AapService: No overlay permission, not raising the projection")
+                    // On a TopWay unit this is the return over the car's call screen; say why it
+                    // did not happen, once per process, instead of failing silently.
+                    if (!overlayNoticeShown && App.provide(this).topwayCallBridge.isAvailable) {
+                        overlayNoticeShown = true
+                        ToastUtils.showToast(this, R.string.topway_overlay_needed, android.widget.Toast.LENGTH_LONG, force = true)
+                    }
+                }
         }
         return true
     }
@@ -1732,6 +1763,7 @@ class AapService : Service() {
         nightModeManager?.stop()
 
         carKeysManager.onSessionEnded()
+        App.provide(this).topwayCallBridge.onSessionEnded()
 
         if (!isDestroying) updateNotification()
         autoResumePlaybackJob?.cancel()
@@ -2425,6 +2457,39 @@ class AapService : Service() {
      * and torn straight back down. Re-checks on a timer rather than refusing outright: nothing else
      * would re-arm wireless if the USB attempt comes to nothing.
      */
+    /**
+     * Looks again for a phone that was plugged in before the unit booted. The first look can run
+     * before the phone has enumerated, and a switch tried while the phone is still starting up
+     * can go unanswered. Each look stands down once a session is up or one is on its way, and
+     * while a permission prompt for that phone is still open so prompts do not stack.
+     */
+    private fun scheduleBootUsbRescans() {
+        serviceScope.launch {
+            var waited = 0L
+            for (at in BOOT_USB_RESCAN_DELAYS_MS) {
+                delay(at - waited)
+                waited = at
+                if (isDestroying) return@launch
+                if (commManager.isConnected ||
+                    commManager.connectionState.value is CommManager.ConnectionState.Connecting ||
+                    usbLauncherManager.isSwitchingToProjection()) return@launch
+                val usbManager = UsbDeviceCompat.usbManager(this@AapService) ?: return@launch
+                val phones = try {
+                    usbManager.deviceList.values.filter { UsbDeviceCompat.isConnectable(this@AapService, it) }
+                } catch (e: Exception) {
+                    emptyList()
+                }
+                if (phones.isEmpty()) continue
+                if (phones.any { !UsbDeviceCompat.isInAccessoryMode(it) && !usbManager.hasPermission(it) }) {
+                    AppLog.i("AapService: boot USB look ${at / 1000}s: waiting on the USB permission prompt")
+                    continue
+                }
+                AppLog.i("AapService: boot USB look ${at / 1000}s: phone on the bus but no session, checking it again")
+                usbLauncherManager.checkAlreadyConnected(force = true)
+            }
+        }
+    }
+
     private fun deferWirelessForUsbHandoff(): Boolean {
         if (isDestroying) return false
         // A plug-in that has failed for its whole budget no longer holds wireless off.
@@ -2963,7 +3028,7 @@ class AapService : Service() {
         AppLog.i("AapService: onTaskRemoved — attempting restart")
         try {
             val restartIntent = Intent(this, AapService::class.java)
-            ContextCompat.startForegroundService(this, restartIntent)
+            ServiceStarts.start(this, restartIntent)
         } catch (e: Exception) {
             AppLog.e("AapService: failed to restart after task removal: ${e.message}")
         }
@@ -3877,6 +3942,12 @@ class AapService : Service() {
     // -------------------------------------------------------------------------
 
     companion object {
+        /** How long after boot a phone already on the bus counts as freshly plugged in. */
+        private const val BOOT_USB_WINDOW_MS = 3 * 60_000L
+
+        /** Later looks after boot: a phone or the unit's USB hub can come up after this service. */
+        private val BOOT_USB_RESCAN_DELAYS_MS = longArrayOf(5_000L, 12_000L, 25_000L)
+
         @Volatile
         var instance: AapService? = null
             private set

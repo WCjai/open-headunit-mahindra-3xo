@@ -38,6 +38,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.andrerinas.openheadunit.app.ServiceStarts
 
 class UsbListFragment : Fragment() {
     private lateinit var adapter: DeviceAdapter
@@ -230,7 +231,7 @@ class UsbListFragment : Fragment() {
                         "manual USB list (accessory mode)",
                         MainActivity.ConnectionUiMode.OVERLAY
                     )
-                    ContextCompat.startForegroundService(mContext, Intent(mContext, AapService::class.java).apply {
+                    ServiceStarts.start(mContext, Intent(mContext, AapService::class.java).apply {
                         action = AapService.ACTION_CHECK_USB
                         putExtra(AapService.EXTRA_USER_REQUESTED, true)
                     })
@@ -259,7 +260,7 @@ class UsbListFragment : Fragment() {
                         }
                     } else {
                         ToastUtils.showToast(mContext, R.string.requesting_usb_permission, Toast.LENGTH_SHORT)
-                        ContextCompat.startForegroundService(mContext, Intent(mContext, AapService::class.java))
+                        ServiceStarts.start(mContext, Intent(mContext, AapService::class.java))
                         usbManager.requestPermission(
                             device.wrappedDevice,
                             UsbReceiver.createPermissionPendingIntent(mContext)

@@ -35,6 +35,7 @@ import android.os.Looper
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.andrerinas.openheadunit.app.ServiceStarts
 
 class DarkModeFragment : Fragment(), SensorEventListener {
     private lateinit var settings: Settings
@@ -270,7 +271,7 @@ class DarkModeFragment : Fragment(), SensorEventListener {
                 val stopServiceIntent = Intent(requireContext(), AapService::class.java).apply {
                     action = AapService.ACTION_STOP_SERVICE
                 }
-                ContextCompat.startForegroundService(requireContext(), stopServiceIntent)
+                ServiceStarts.start(requireContext(), stopServiceIntent)
             }
         }
 

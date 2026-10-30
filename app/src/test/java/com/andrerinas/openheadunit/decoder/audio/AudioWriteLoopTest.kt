@@ -38,4 +38,12 @@ class AudioWriteLoopTest {
         assertEquals(-6, result)
         assertEquals(8, accepted)
     }
+
+    @Test fun `a full output is retried promptly at first, then less often, never past 8ms`() {
+        var backoff = 1L
+        val waits = mutableListOf<Long>()
+        repeat(6) { waits += backoff; backoff = AudioWriteLoop.nextBackoffMs(backoff) }
+        assertEquals(listOf(1L, 2L, 4L, 8L, 8L, 8L), waits)
+        assertEquals(1L, AudioWriteLoop.nextBackoffMs(0L))
+    }
 }

@@ -74,6 +74,9 @@ object HomeUiHelper {
     private const val NEAR_BLACK = 0xFF14100C.toInt()
     /** Shown in place of the speed while the GPS has nothing current to say. */
     private const val UNKNOWN_SPEED = "--"
+    /** view_tv_aa_card's tag: the tvOS home's Android Auto card, painted by [paintTvCard]. */
+    private const val TV_CARD_TAG = "tv"
+    private const val TV_PULSE_MS = 2_400L
 
     /** The rows a right-hand drive car reads from the other end. Vertical ones are left alone. */
     private val mirroredRows = listOf(
@@ -134,9 +137,14 @@ object HomeUiHelper {
             .forEach { placeChildren(it, reversed = rightHandDrive) }
 
         val side = if (rightHandDrive) Gravity.RIGHT else Gravity.LEFT
-        rootView.findViewById<LinearLayout>(R.id.home_primary_content)?.gravity = side
-        listOf(R.id.home_primary_kicker, R.id.home_primary_title, R.id.home_primary_subtitle).forEach {
-            rootView.findViewById<TextView>(it)?.gravity = side
+        // The tvOS card is centred on both sides of the car.
+        val tvCard = isTvCard(rootView)
+        rootView.findViewById<LinearLayout>(R.id.home_primary_content)?.gravity =
+            if (tvCard) Gravity.CENTER_HORIZONTAL else side
+        if (!tvCard) {
+            listOf(R.id.home_primary_kicker, R.id.home_primary_title, R.id.home_primary_subtitle).forEach {
+                rootView.findViewById<TextView>(it)?.gravity = side
+            }
         }
         // The date and the speed read inwards, so they line up with the edge they sit against, and
         // they sit at the far end of the card, which is the other side from the driver.
@@ -565,6 +573,11 @@ object HomeUiHelper {
             stopProgressShine(rootView)
         }
 
+        if (card.tag == TV_CARD_TAG) {
+            paintTvCard(context, rootView, card, decision, phoneName)
+            return
+        }
+
         val color = connectionColor(settings, decision.primary, palette)
         paintProgress(context, rootView, color, palette)
         val resources = context.resources
@@ -960,6 +973,132 @@ object HomeUiHelper {
         shine.setTag(R.id.home_progress_shine_detach, null)
         // Parked before the start, so a cancelled sweep does not leave a light standing mid-bar.
         shine.translationX = -shine.layoutParams.width.toFloat()
+    }
+
+    private fun isTvCard(rootView: View): Boolean =
+        rootView.findViewById<View>(R.id.home_primary_card)?.tag == TV_CARD_TAG
+
+    /**
+     * The tvOS home's Android Auto card (view_tv_aa_card): glass, the connection in a chip, a ringed
+     * phone in the middle that turns white and pulses green while a phone is connected, and one wide
+     * button, white for "Back to Android Auto". Text and visibility were already set by
+     * [applyPrimaryCard]; this paints and, for a live session, names the phone.
+     */
+    private fun paintTvCard(context: Context, rootView: View, card: View, decision: Decision, phoneName: String?) {
+        val active = decision.status == Status.ACTIVE_SESSION
+        card.setBackgroundResource(if (active) R.drawable.tv_card_active_bg else R.drawable.tv_card_bg)
+        val white = Color.WHITE
+        val muted = ContextCompat.getColor(context, R.color.tv_white_70)
+
+        rootView.findViewById<LinearLayout>(R.id.home_primary_content)?.gravity = Gravity.CENTER_HORIZONTAL
+        rootView.findViewById<TextView>(R.id.home_primary_kicker)?.apply {
+            // The chip names the connection; "Android Auto" is already the card's own label.
+            text = context.getString(connectionLabel(decision.primary))
+            setTextColor(white)
+            gravity = Gravity.CENTER_VERTICAL
+        }
+        rootView.findViewById<ImageView>(R.id.tv_aa_chip_icon)?.setImageResource(iconRes(decision.primary))
+        rootView.findViewById<TextView>(R.id.home_primary_title)?.apply {
+            if (active && !phoneName.isNullOrBlank()) text = phoneName
+            setTextColor(white)
+            gravity = Gravity.CENTER
+        }
+        rootView.findViewById<TextView>(R.id.home_primary_subtitle)?.apply {
+            if (active) {
+                text = context.getString(R.string.tv_aa_connected)
+                setTextColor(ContextCompat.getColor(context, R.color.tv_connected_text))
+            } else {
+                setTextColor(muted)
+            }
+            gravity = Gravity.CENTER
+        }
+        rootView.findViewById<TextView>(R.id.home_primary_detail)?.apply {
+            setTextColor(ContextCompat.getColor(context, R.color.tv_white_60))
+            gravity = Gravity.CENTER
+        }
+
+        val countdown = rootView.findViewById<TextView>(R.id.home_countdown)
+        countdown?.background = null
+        countdown?.setTextColor(if (active) Color.BLACK else white)
+        val counting = countdown?.visibility == View.VISIBLE
+        rootView.findViewById<ImageView>(R.id.tv_aa_icon)?.apply {
+            visibility = if (counting) View.GONE else View.VISIBLE
+            setColorFilter(
+                if (active) ContextCompat.getColor(context, R.color.tv_connected_icon) else white,
+                PorterDuff.Mode.SRC_IN
+            )
+            alpha = if (active) 1f else 0.9f
+        }
+        rootView.findViewById<View>(R.id.tv_aa_disc)
+            ?.setBackgroundResource(if (active) R.drawable.tv_disc_white else R.drawable.tv_disc_glass)
+        rootView.findViewById<View>(R.id.tv_aa_ring)
+            ?.setBackgroundResource(if (active) R.drawable.tv_ring_green else R.drawable.tv_ring_bg)
+        setTvPulse(rootView.findViewById(R.id.tv_aa_pulse), active)
+
+        rootView.findViewById<TextView>(R.id.home_primary_action)?.apply {
+            if (active) {
+                setBackgroundResource(R.drawable.tv_white_btn_bg)
+                setTextColor(Color.BLACK)
+            } else {
+                setBackgroundResource(R.drawable.tv_wide_glass_btn_bg)
+                setTextColor(white)
+            }
+        }
+        rootView.findViewById<TextView>(R.id.home_primary_cancel)?.apply {
+            setBackgroundResource(R.drawable.tv_wide_glass_btn_bg)
+            setTextColor(white)
+        }
+
+        // The bring-up bar: white on a faint track, like the song's progress on Now Playing.
+        val radius = dp(context, 3).toFloat()
+        rootView.findViewById<View>(R.id.home_primary_progress)?.background =
+            rounded(withAlpha(white, PROGRESS_TRACK_ALPHA), radius)
+        rootView.findViewById<View>(R.id.home_primary_progress_fill)?.background = rounded(white, radius)
+    }
+
+    private fun connectionLabel(connection: Connection): Int = when (connection) {
+        Connection.USB -> R.string.home_kicker_cable
+        Connection.WIFI -> R.string.home_kicker_wireless
+        Connection.SELF -> R.string.self_mode
+    }
+
+    /** The green ring that breathes out from the phone while a session is live. One animator per card. */
+    private fun setTvPulse(pulse: View?, on: Boolean) {
+        pulse ?: return
+        val running = pulse.getTag(R.id.tv_pulse_animator) as? ValueAnimator
+        if (!on) {
+            running?.cancel()
+            pulse.setTag(R.id.tv_pulse_animator, null)
+            pulse.visibility = View.INVISIBLE
+            return
+        }
+        pulse.visibility = View.VISIBLE
+        if (running != null) return
+        if (!animationsEnabled(pulse.context)) {
+            pulse.alpha = 0.6f
+            return
+        }
+        val animator = ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = TV_PULSE_MS
+            repeatCount = ValueAnimator.INFINITE
+            addUpdateListener {
+                val t = it.animatedValue as Float
+                val scale = 1f + 0.22f * t
+                pulse.scaleX = scale
+                pulse.scaleY = scale
+                pulse.alpha = 0.7f * (1f - t)
+            }
+        }
+        pulse.setTag(R.id.tv_pulse_animator, animator)
+        pulse.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+            override fun onViewAttachedToWindow(v: View) {}
+            override fun onViewDetachedFromWindow(v: View) {
+                (v.getTag(R.id.tv_pulse_animator) as? ValueAnimator)?.cancel()
+                v.setTag(R.id.tv_pulse_animator, null)
+                v.removeOnAttachStateChangeListener(this)
+            }
+        })
+        animator.start()
     }
 
     /** The developer option and the accessibility one that turns animations off both set this. */

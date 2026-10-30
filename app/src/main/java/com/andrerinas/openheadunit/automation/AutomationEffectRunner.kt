@@ -18,6 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.io.File
+import com.andrerinas.openheadunit.app.ServiceStarts
 
 /**
  * Carries out what [AutomationCommandPolicy] decided. Shared by [AutomationReceiver] and the
@@ -69,7 +70,7 @@ object AutomationEffectRunner {
     }
 
     private fun startService(context: Context, effect: AutomationCommandPolicy.Effect.StartService) {
-        ContextCompat.startForegroundService(
+        ServiceStarts.start(
             context,
             Intent(context, AapService::class.java).apply {
                 action = effect.action
@@ -85,7 +86,7 @@ object AutomationEffectRunner {
             "night" -> Settings.NightMode.NIGHT
             else -> Settings.NightMode.AUTO
         }
-        ContextCompat.startForegroundService(
+        ServiceStarts.start(
             context,
             Intent(context, AapService::class.java).apply {
                 action = AapService.ACTION_REQUEST_NIGHT_MODE_UPDATE

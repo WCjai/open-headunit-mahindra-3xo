@@ -83,7 +83,7 @@ class BootCompleteReceiver : BroadcastReceiver() {
     // From API 31 a background start can be refused, and API 35 also sends the boot broadcasts
     // when a stopped app first starts, without the boot exemption. Log it rather than crash.
     private fun startService(context: Context, intent: Intent, trigger: String?): Boolean = try {
-        ContextCompat.startForegroundService(context, intent)
+        ServiceStarts.start(context, intent)
         true
     } catch (e: IllegalStateException) {
         AppLog.w("Boot auto-start: Android refused to start AapService (trigger=$trigger): ${e.message}")

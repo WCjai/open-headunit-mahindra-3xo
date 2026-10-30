@@ -23,4 +23,18 @@ internal object AudioWriteLoop {
         }
         return offset
     }
+
+    /**
+     * How long to wait for a full output to take more, growing while it stays full.
+     *
+     * Writes are non-blocking, so a full track is retried. A fixed 1ms retry is fine where the
+     * HAL takes small bursts, but a unit whose mixer pulls ~62ms at a time (measured: TopWay T3,
+     * 2720 frames at 44.1 kHz) stays full for most of each period, and 1ms retries woke the mixer
+     * ~1000 times a second at urgent-audio priority. That cost over half a core and starved the
+     * video and transport threads the audio depends on. Doubling to [MAX_BACKOFF_MS] keeps the
+     * first retry prompt; a full output holds at least one HAL period, so 8ms never starves it.
+     */
+    const val MAX_BACKOFF_MS = 8L
+
+    fun nextBackoffMs(currentMs: Long): Long = (currentMs * 2).coerceIn(1L, MAX_BACKOFF_MS)
 }

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The splash logo (cut from the unit's boot screen, 512x354). -->
+    <dimen name="splash_logo_width">240dp</dimen>
+    <dimen name="splash_logo_height">166dp</dimen>
+</resources>

@@ -8,6 +8,7 @@ import com.andrerinas.openheadunit.decoder.audio.AudioDecoder
 import com.andrerinas.openheadunit.decoder.video.DeviceMemoryProfile
 import com.andrerinas.openheadunit.decoder.video.VideoDecoder
 import com.andrerinas.openheadunit.connection.carkey.CarKeysManager
+import com.andrerinas.openheadunit.connection.carkey.topway.TopwayCallBridge
 import com.andrerinas.openheadunit.utils.SUExecutor
 import com.andrerinas.openheadunit.utils.Settings
 
@@ -31,4 +32,6 @@ class AppComponent(private val app: App) {
     val suExecutor = SUExecutor()
 
     val carKeysManager = CarKeysManager()
+
+    val topwayCallBridge = TopwayCallBridge(app)
 }

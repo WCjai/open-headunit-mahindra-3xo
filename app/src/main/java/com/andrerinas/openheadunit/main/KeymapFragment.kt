@@ -21,6 +21,9 @@ import com.andrerinas.openheadunit.R
 import com.andrerinas.openheadunit.contract.KeyIntent
 import com.andrerinas.openheadunit.input.BydPanelKey
 import com.andrerinas.openheadunit.input.KeyCode
+import com.andrerinas.openheadunit.input.TopwayKey
+import com.andrerinas.openheadunit.connection.carkey.topway.CarTopwayReceiver
+import com.andrerinas.openheadunit.connection.carkey.topway.TwUtilChannel
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.IntentFilters
 import com.andrerinas.openheadunit.utils.Settings
@@ -37,6 +40,7 @@ class KeymapFragment : Fragment(), MainActivity.KeyListener {
     private lateinit var adapter: KeymapAdapter
     private lateinit var settings: Settings
     private val RESET_ITEM_ID = 1003
+    private val LEARN_WHEEL_ITEM_ID = 1004
 
     private var assignTargetCode = KeyEvent.KEYCODE_UNKNOWN
     private var assignDialog: androidx.appcompat.app.AlertDialog? = null
@@ -60,6 +64,9 @@ class KeymapFragment : Fragment(), MainActivity.KeyListener {
         KeymapItem(R.string.key_search, KeyEvent.KEYCODE_SEARCH),
         KeymapItem(R.string.key_call, KeyEvent.KEYCODE_CALL),
         KeymapItem(R.string.key_endcall, KeyEvent.KEYCODE_ENDCALL),
+        KeymapItem(R.string.key_volume_up, KeyEvent.KEYCODE_VOLUME_UP),
+        KeymapItem(R.string.key_volume_down, KeyEvent.KEYCODE_VOLUME_DOWN),
+        KeymapItem(R.string.key_volume_mute, KeyEvent.KEYCODE_VOLUME_MUTE),
         KeymapItem(R.string.key_music, KeyEvent.KEYCODE_MUSIC),
         KeymapItem(R.string.key_nav, 65538),
         KeymapItem(R.string.key_night, KeyCode.KEY_NIGHT_MODE),
@@ -104,6 +111,18 @@ class KeymapFragment : Fragment(), MainActivity.KeyListener {
             findNavController().popBackStack()
         }
         
+        // TopWay units learn their wheel buttons in the MCU first; offer that right here.
+        if (TwUtilChannel.available) {
+            val learnItem = toolbar.menu.add(0, LEARN_WHEEL_ITEM_ID, 0, getString(R.string.topway_wheel_title))
+            learnItem.setShowAsAction(android.view.MenuItem.SHOW_AS_ACTION_ALWAYS)
+            toolbar.setOnMenuItemClickListener { item ->
+                if (item.itemId == LEARN_WHEEL_ITEM_ID) {
+                    startActivity(Intent(requireContext(), TopwayWheelActivity::class.java))
+                    true
+                } else false
+            }
+        }
+
         val resetItem = toolbar.menu.add(0, RESET_ITEM_ID, 0, getString(R.string.reset))
         resetItem.setShowAsAction(android.view.MenuItem.SHOW_AS_ACTION_ALWAYS)
         resetItem.setActionView(R.layout.layout_reset_button)
@@ -181,6 +200,11 @@ class KeymapFragment : Fragment(), MainActivity.KeyListener {
         val filter = IntentFilters.keyEvent
         filter.addAction("com.andrerinas.openheadunit.DEBUG_KEY")
         ContextCompat.registerReceiver(requireContext(), keyCodeReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
+        // On a TopWay unit, say whether its key channel opened: without adb this is the only place
+        // to see why a wheel button produces nothing here.
+        CarTopwayReceiver.status?.let {
+            keypressDebuggerTextView.text = "TopWay steering-wheel keys: $it"
+        }
     }
 
     override fun onPause() {
@@ -249,6 +273,7 @@ class KeymapFragment : Fragment(), MainActivity.KeyListener {
      */
     private fun physicalKeyName(keyCode: Int): String {
         BydPanelKey.label(keyCode)?.let { return it }
+        TopwayKey.label(keyCode)?.let { return it }
         return try {
             KeyEvent.keyCodeToString(keyCode).replace("KEYCODE_", "")
         } catch (e: Exception) {

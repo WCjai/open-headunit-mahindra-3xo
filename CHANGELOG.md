@@ -13,6 +13,9 @@
 - Fix(usb): Resolve dongle AOA switching
 - Status pill: stop saying Android Auto is starting when nothing is
 - Projection: keep the decoder through a short cover
+- Car keys: TopWay (TW) steering-wheel and panel keys, learnable in the keymap
+- Keymap: Volume Up, Volume Down and Mute targets that change the head unit's own volume
+- TopWay: answer and hang up through the unit's own Bluetooth, and release its Bluetooth music while Android Auto plays
 
 ### v.3.5.0
 - Native AA: reconnect to a network that is still there, wake the phone over Bluetooth or the external module, bring a lost group or hotspot back after sleep, boot or ACC wake, stop advertising an address that moves, and pick, wake or hold back only for a phone that is on

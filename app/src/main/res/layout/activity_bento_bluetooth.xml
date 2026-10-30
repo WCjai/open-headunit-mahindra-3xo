@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Bluetooth, in the bento style: the phone's link on the left, its music in the middle, and the
+    car's pairing, phonebook and name/PIN pages on the right. Sized for a 1280x480 head unit.
+-->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="@dimen/bento_pad">
+
+    <!-- Top bar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:id="@+id/bento_back"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bento_round_button_bg"
+            android:padding="9dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:contentDescription="@string/bento_back"
+            app:srcCompat="@drawable/ic_bento_back" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="14dp"
+            android:text="@string/bento_bt_title"
+            android:textColor="@color/bento_text"
+            android:textSize="28sp"
+            android:fontFamily="sans-serif-light" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/bt_car_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bento_pill_bg"
+            android:paddingLeft="14dp"
+            android:paddingRight="14dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
+            android:textColor="@color/bento_text_secondary"
+            android:textSize="13sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="@dimen/bento_gap"
+        android:orientation="horizontal"
+        android:baselineAligned="false">
+
+        <!-- Phone link -->
+        <LinearLayout
+            android:id="@+id/bt_phone_card"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center_vertical"
+            android:background="@drawable/bento_card_bg"
+            android:padding="22dp">
+
+            <TextView
+                style="@style/BentoKicker"
+                android:text="@string/bento_bt_phone" />
+
+            <FrameLayout
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:layout_marginTop="16dp">
+
+                <View
+                    android:id="@+id/bt_phone_badge"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bento_phone_badge_bg" />
+
+                <ImageView
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_gravity="center"
+                    android:importantForAccessibility="no"
+                    app:srcCompat="@drawable/ic_bento_smartphone" />
+
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/bt_phone_state"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:textColor="@color/bento_text"
+                android:textSize="24sp"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/bt_phone_detail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/bento_text_secondary"
+                android:textSize="14sp"
+                android:maxLines="2"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/bt_disconnect"
+                style="@style/BentoSegment"
+                android:layout_marginTop="16dp"
+                android:drawablePadding="8dp"
+                android:text="@string/bento_bt_disconnect" />
+
+        </LinearLayout>
+
+        <!-- Bluetooth audio -->
+        <LinearLayout
+            android:id="@+id/bt_music_card"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1.35"
+            android:layout_marginLeft="@dimen/bento_gap"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/bento_card_bg"
+            android:padding="20dp">
+
+            <FrameLayout
+                android:layout_width="150dp"
+                android:layout_height="150dp">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bento_art_placeholder" />
+
+                <ImageView
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:layout_gravity="center"
+                    android:alpha="0.55"
+                    android:importantForAccessibility="no"
+                    app:srcCompat="@drawable/ic_bento_music_note" />
+
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginLeft="20dp"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/BentoKicker"
+                    android:text="@string/bento_bt_now_playing" />
+
+                <TextView
+                    android:id="@+id/bt_music_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:textColor="@color/bento_text"
+                    android:textSize="21sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:maxLines="2"
+                    android:ellipsize="end" />
+
+                <TextView
+                    android:id="@+id/bt_music_artist"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textColor="@color/bento_text_secondary"
+                    android:textSize="15sp"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <LinearLayout
+                    android:id="@+id/bt_music_controls"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:id="@+id/bt_music_prev"
+                        style="@style/BentoMediaButton"
+                        android:contentDescription="@string/bento_previous"
+                        app:srcCompat="@drawable/ic_bento_skip_previous" />
+
+                    <FrameLayout
+                        android:id="@+id/bt_music_play"
+                        android:layout_width="@dimen/bento_play_button"
+                        android:layout_height="@dimen/bento_play_button"
+                        android:layout_marginLeft="14dp"
+                        android:layout_marginRight="14dp"
+                        android:background="@drawable/bento_play_button_bg"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:contentDescription="@string/bento_play_pause">
+
+                        <ImageView
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:layout_gravity="center"
+                            android:importantForAccessibility="no"
+                            app:srcCompat="@drawable/ic_bento_play_pause"
+                            app:tint="@color/bento_play_icon" />
+
+                    </FrameLayout>
+
+                    <ImageView
+                        android:id="@+id/bt_music_next"
+                        style="@style/BentoMediaButton"
+                        android:contentDescription="@string/bento_next"
+                        app:srcCompat="@drawable/ic_bento_skip_next" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- The car's own pages -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.95"
+            android:layout_marginLeft="@dimen/bento_gap"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/bt_tile_pair"
+                style="@style/BentoRowTile">
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:importantForAccessibility="no"
+                    app:srcCompat="@drawable/ic_bento_bt_search" />
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginLeft="14dp"
+                    android:orientation="vertical">
+                    <TextView style="@style/BentoRowTileTitle" android:text="@string/bento_bt_pair" />
+                    <TextView style="@style/BentoRowTileSubtitle" android:text="@string/bento_bt_pair_detail" />
+                </LinearLayout>
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:alpha="0.5"
+                    android:importantForAccessibility="no"
+                    app:srcCompat="@drawable/ic_bento_chevron_right" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/bt_tile_phonebook"
+                style="@style/BentoRowTile"
+                android:layout_marginTop="@dimen/bento_gap">
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:importantForAccessibility="no"
+                    app:srcCompat="@drawable/ic_bento_contacts" />
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginLeft="14dp"
+                    android:orientation="vertical">
+                    <TextView style="@style/BentoRowTileTitle" android:text="@string/bento_bt_phonebook" />
+                    <TextView android:id="@+id/bt_phonebook_detail" style="@style/BentoRowTileSubtitle" />
+                </LinearLayout>
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:alpha="0.5"
+                    android:importantForAccessibility="no"
+                    app:srcCompat="@drawable/ic_bento_chevron_right" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/bt_tile_settings"
+                style="@style/BentoRowTile"
+                android:layout_marginTop="@dimen/bento_gap">
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:importantForAccessibility="no"
+                    app:srcCompat="@drawable/ic_bento_tune" />
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginLeft="14dp"
+                    android:orientation="vertical">
+                    <TextView style="@style/BentoRowTileTitle" android:text="@string/bento_bt_settings" />
+                    <TextView style="@style/BentoRowTileSubtitle" android:text="@string/bento_bt_settings_detail" />
+                </LinearLayout>
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:alpha="0.5"
+                    android:importantForAccessibility="no"
+                    app:srcCompat="@drawable/ic_bento_chevron_right" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

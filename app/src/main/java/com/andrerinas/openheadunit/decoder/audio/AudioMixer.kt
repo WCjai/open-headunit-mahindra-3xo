@@ -289,6 +289,8 @@ class AudioMixer(
         var previousMixWorkMaxMs = 0L
         var writeMaxMs = 0L
         var renderWaits = 0L
+        // Wait between retries of a full output; see AudioWriteLoop.nextBackoffMs.
+        var writeBackoffMs = 1L
         while (running.get()) {
             val now = SystemClock.elapsedRealtime()
             if (lastCycleMs >= 0) loopGapMaxMs = maxOf(loopGapMaxMs, now - lastCycleMs)
@@ -447,7 +449,11 @@ class AudioMixer(
                         0
                     } else written
                 },
-                {}, { Thread.sleep(1) })
+                { writeBackoffMs = 1L },
+                {
+                    Thread.sleep(writeBackoffMs)
+                    writeBackoffMs = AudioWriteLoop.nextBackoffMs(writeBackoffMs)
+                })
             writeMaxMs = maxOf(writeMaxMs, SystemClock.elapsedRealtime() - writeStartMs)
             check(result >= 0) { "${device.name} write failed: $result" }
             val writeCompletedMs = SystemClock.elapsedRealtime()

@@ -93,6 +93,7 @@ class CustomizationFragment : Fragment() {
     private var rowColorWifi: View? = null
     private var switchAutoMonochromeNight: SwitchMaterial? = null
     private var switchShowFavoriteApps: SwitchMaterial? = null
+    private var switchHomeLayoutBento: SwitchMaterial? = null
     private var switchShowClock: SwitchMaterial? = null
     private var switchShowSpeed: SwitchMaterial? = null
     private var btnMakeAllMonochrome: MaterialButton? = null
@@ -226,11 +227,13 @@ class CustomizationFragment : Fragment() {
         rowColorWifi = view.findViewById(R.id.row_color_wifi)
         switchAutoMonochromeNight = view.findViewById(R.id.switch_auto_monochrome_night)
         switchShowFavoriteApps = view.findViewById(R.id.switch_show_favorite_apps)
+        switchHomeLayoutBento = view.findViewById(R.id.switch_home_layout_bento)
         switchShowClock = view.findViewById(R.id.switch_show_clock)
         switchShowSpeed = view.findViewById(R.id.switch_show_speed)
         // A tap anywhere on a switch row flips its switch, not only on the switch itself.
         toggleSwitchFromRow(view.findViewById(R.id.row_auto_monochrome_night), switchAutoMonochromeNight)
         toggleSwitchFromRow(view.findViewById(R.id.row_show_favorite_apps), switchShowFavoriteApps)
+        toggleSwitchFromRow(view.findViewById(R.id.row_home_layout_bento), switchHomeLayoutBento)
         toggleSwitchFromRow(view.findViewById(R.id.row_show_clock), switchShowClock)
         toggleSwitchFromRow(view.findViewById(R.id.row_show_speed), switchShowSpeed)
         btnMakeAllMonochrome = view.findViewById(R.id.btn_make_all_monochrome)
@@ -350,6 +353,12 @@ class CustomizationFragment : Fragment() {
                 notifyMainActivityBackgroundChanged()
                 refreshUI()
             }
+        }
+
+        switchHomeLayoutBento?.isChecked = settings.homeLayoutBento
+        switchHomeLayoutBento?.setOnCheckedChangeListener { _, isChecked ->
+            // HomeFragment picks its layout when its view is made, so it shows on the next visit.
+            settings.homeLayoutBento = isChecked
         }
 
         switchShowFavoriteApps?.isChecked = settings.showHomeFavoriteApps

@@ -46,6 +46,8 @@ class App : Application(), Application.ActivityLifecycleCallbacks {
         super.onCreate()
         instance = this
         registerActivityLifecycleCallbacks(this)
+        com.andrerinas.openheadunit.connection.carkey.topway.TwProbe.register(this)
+        com.andrerinas.openheadunit.connection.carkey.topway.TopwayContacts.register(this)
 
         try {
             val packageReceiver = object : BroadcastReceiver() {

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Home button floating over Android Auto: a solid white disc with a soft edge, so it stands out on light and dark maps. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true"><shape android:shape="oval"><solid android:color="#FFD1D1D6" /><stroke android:width="1dp" android:color="#33000000" /></shape></item>
+    <item><shape android:shape="oval"><solid android:color="#FFFFFFFF" /><stroke android:width="1dp" android:color="#33000000" /></shape></item>
+</selector>

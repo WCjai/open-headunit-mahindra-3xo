@@ -359,7 +359,10 @@
 
     </FrameLayout>
 
-    <!-- Splash Overlay for controlled delay and branding text -->
+    <!--
+        Splash overlay: the car's own boot screen (the logo on black, the same size and place as the
+        unit shows it at power-on), held for the controlled delay.
+    -->
     <RelativeLayout
         android:id="@+id/splash_overlay"
         android:layout_width="match_parent"
@@ -369,36 +372,12 @@
         android:focusable="true"
         android:gravity="center">
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:orientation="vertical">
+        <ImageView
+            android:layout_width="@dimen/splash_logo_width"
+            android:layout_height="@dimen/splash_logo_height"
+            android:importantForAccessibility="no"
+            android:scaleType="fitCenter"
+            android:src="@drawable/splash_logo" />
 
-            <ImageView
-                android:layout_width="160dp"
-                android:layout_height="160dp"
-                android:src="@drawable/splash_logo" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                android:text="OPEN"
-                android:textColor="@color/splash_text_white"
-                android:textSize="35sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="-4dp"
-                android:text="Headunit"
-                android:textAllCaps="true"
-                android:textColor="@color/splash_text_revived"
-                android:textSize="35sp"
-                android:textStyle="bold" />
-
-        </LinearLayout>
     </RelativeLayout>
 </FrameLayout>

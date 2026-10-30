@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- A car-wide screen (1280x480 at 160 dpi): the logo at the size the unit's boot screen shows it. -->
+    <dimen name="splash_logo_width">512dp</dimen>
+    <dimen name="splash_logo_height">354dp</dimen>
+</resources>

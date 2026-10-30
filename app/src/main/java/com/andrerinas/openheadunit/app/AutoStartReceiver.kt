@@ -61,7 +61,7 @@ class AutoStartReceiver : BroadcastReceiver() {
                 val serviceIntent = Intent(context, AapService::class.java).setAction(AapService.ACTION_BT_AUTO_START)
                     .putExtra(AapService.EXTRA_UI_HELD, uiHeld)
                 try {
-                    androidx.core.content.ContextCompat.startForegroundService(context, serviceIntent)
+                    ServiceStarts.start(context, serviceIntent)
                 } catch (e: Exception) {
                     AppLog.e("Failed to start AapService from background: ${e.message}")
                 }

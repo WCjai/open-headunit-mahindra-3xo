@@ -9,6 +9,12 @@ import com.andrerinas.openheadunit.aap.AaPresentationSession
 import com.andrerinas.openheadunit.aap.AapTransport
 import com.andrerinas.openheadunit.aap.NarrowBandProfilePolicy
 import com.andrerinas.openheadunit.input.MediaKeyRoutingPolicy
+import com.andrerinas.openheadunit.input.LocalVolumeKeyPolicy
+import com.andrerinas.openheadunit.connection.carkey.topway.TopwayBluetooth
+import com.andrerinas.openheadunit.connection.carkey.topway.TopwayWheel
+import com.andrerinas.openheadunit.App
+import com.andrerinas.openheadunit.decoder.audio.CallState
+import com.andrerinas.openheadunit.decoder.audio.MicRecorder
 import com.andrerinas.openheadunit.decoder.audio.PlaybackFocusPolicy
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.BluetoothHelper
@@ -1298,8 +1304,14 @@ class CommManager(
         // These keys are intended to be learned/mapped in the Keymap settings.
         // Sending them directly to AA would result in KEYCODE_UNKNOWN.
         if (keyCode >= 1000 && logicalCode == keyCode) {
-            AppLog.v("CommManager: Ignoring unmapped proprietary key $keyCode")
-            return
+            // A TopWay button carries the function it was learned as on the unit (Next, Answer, ...),
+            // so it has a meaning of its own even before the user maps it. The keymap still wins.
+            val topwayDefault = TopwayWheel.defaultKeyCodeFor(keyCode)
+            if (topwayDefault == null) {
+                AppLog.v("CommManager: Ignoring unmapped proprietary key $keyCode")
+                return
+            }
+            logicalCode = topwayDefault
         }
 
         // [FIX] BMW/Rotary Enter remapping: Most AA apps expect DPAD_CENTER (23) for selection,
@@ -1338,6 +1350,33 @@ class CommManager(
             return
         }
 
+        // 5. A button bound to Volume Up/Down/Mute turns this head unit's volume. Android Auto plays
+        // on our streams, so the phone could not act on it. See LocalVolumeKeyPolicy.
+        val localVolume = LocalVolumeKeyPolicy.actionFor(keyCode, logicalCode)
+        if (localVolume != null) {
+            if (isPress) adjustLocalVolume(localVolume, keyCode, source)
+            return
+        }
+
+        // 6. During a call on a TopWay unit's own Bluetooth module, Call / End Call act on the
+        // module, which is where the call and its audio are. See TopwayBluetooth.routeCallKey.
+        val topway = App.provide(context).topwayCallBridge
+        when (TopwayBluetooth.routeCallKey(keyCode, logicalCode, topway.callState, topway.moduleConnected)) {
+            TopwayBluetooth.CallKeyRoute.ANDROID_AUTO -> {}
+            TopwayBluetooth.CallKeyRoute.ALREADY_HANDLED -> {
+                AppLog.i("CommManager: Key $logicalCode from the wheel is handled by the unit's Bluetooth app itself")
+                return
+            }
+            TopwayBluetooth.CallKeyRoute.UNIT_ANSWER -> {
+                if (isPress) topway.answer()
+                return
+            }
+            TopwayBluetooth.CallKeyRoute.UNIT_END -> {
+                if (isPress) topway.endCall()
+                return
+            }
+        }
+
         if (decision.releaseFirst) {
             AppLog.i("CommManager: Key $logicalCode was still held from an earlier press with no release - releasing it first")
             _transport?.send(logicalCode, false)
@@ -1368,6 +1407,41 @@ class CommManager(
             btMediaLinkCached = state
         }
         return state
+    }
+
+    /**
+     * One volume step on this head unit, for a button the keymap binds to a volume action.
+     *
+     * During a call Android chooses the stream (the call's own, when the call runs through this
+     * unit's audio); otherwise it is the stream Android Auto media is played on, which the user may
+     * have pointed somewhere other than STREAM_MUSIC.
+     */
+    private fun adjustLocalVolume(action: LocalVolumeKeyPolicy.Action, physicalCode: Int, source: String) {
+        val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager ?: return
+        val direction = when (action) {
+            LocalVolumeKeyPolicy.Action.RAISE -> AudioManager.ADJUST_RAISE
+            LocalVolumeKeyPolicy.Action.LOWER -> AudioManager.ADJUST_LOWER
+            LocalVolumeKeyPolicy.Action.TOGGLE_MUTE -> {
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                    AppLog.w("CommManager: Mute needs Android 6 or newer; ignoring key $physicalCode")
+                    return
+                }
+                AudioManager.ADJUST_TOGGLE_MUTE
+            }
+        }
+        val inCall = CallState.isCallActive(audioManager.mode, MicRecorder.holdsCommunicationMode)
+        try {
+            if (inCall) {
+                audioManager.adjustSuggestedStreamVolume(direction, AudioManager.USE_DEFAULT_STREAM_TYPE, AudioManager.FLAG_SHOW_UI)
+            } else {
+                audioManager.adjustStreamVolume(settings.mediaAudioStream, direction, AudioManager.FLAG_SHOW_UI)
+            }
+            AppLog.i("CommManager: Local volume $action from key $physicalCode (src=$source, inCall=$inCall)")
+        } catch (e: Exception) {
+            // Do-not-disturb refuses mute changes with a SecurityException; a vendor stream id the
+            // platform does not know throws IllegalArgumentException. Neither is worth the session.
+            AppLog.w("CommManager: Could not change the volume ($action): ${e.message}")
+        }
     }
 
     private fun isMediaKey(code: Int): Boolean {

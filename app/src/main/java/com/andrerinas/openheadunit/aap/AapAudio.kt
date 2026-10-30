@@ -16,6 +16,7 @@ import com.andrerinas.openheadunit.decoder.audio.AudioDiagnostics
 import com.andrerinas.openheadunit.decoder.audio.AudioSinkSetupPolicy
 import com.andrerinas.openheadunit.decoder.audio.AudioStreamCatalog
 import com.andrerinas.openheadunit.decoder.audio.PlaybackFocusPolicy
+import com.andrerinas.openheadunit.connection.carkey.topway.TwUtilChannel
 import com.andrerinas.openheadunit.decoder.audio.PlaybackFocusLease
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.Settings
@@ -284,6 +285,12 @@ internal class AapAudio(
      * the car radio) a permanent loss, so they may not resume when we abandon it. Transient loss
      * lets them pause and resume once all AA output drains. Static focus uses its separate path.
      */
+    private val playbackGain: Int by lazy {
+        PlaybackFocusPolicy.playbackFocusGain(topwayUnit = TwUtilChannel.available)
+    }
+
+    private fun gainName() = if (playbackGain == AudioManager.AUDIOFOCUS_GAIN) "permanent (TopWay unit)" else "transient"
+
     private fun requestPlaybackFocus(): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val audioAttributes = AudioAttributes.Builder()
@@ -291,7 +298,7 @@ internal class AapAudio(
                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                     .build()
 
-            val request = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
+            val request = AudioFocusRequest.Builder(playbackGain)
                     .setAudioAttributes(audioAttributes)
                     .setWillPauseWhenDucked(false)
                     .setOnAudioFocusChangeListener(playbackFocusListener)
@@ -299,14 +306,14 @@ internal class AapAudio(
             playbackFocusRequest = request
 
             val result = audioManager.requestAudioFocus(request)
-            AppLog.i("AapAudio: Playback transient focus request result: ${if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) "GRANTED" else "FAILED ($result)"}")
+            AppLog.i("AapAudio: Playback ${gainName()} focus request result: ${if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) "GRANTED" else "FAILED ($result)"}")
             return result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
         } else {
             @Suppress("DEPRECATION")
             legacyPlaybackFocusListener = playbackFocusListener
             @Suppress("DEPRECATION")
-            val result = audioManager.requestAudioFocus(playbackFocusListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
-            AppLog.i("AapAudio: Playback transient focus request result (legacy): ${if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) "GRANTED" else "FAILED"}")
+            val result = audioManager.requestAudioFocus(playbackFocusListener, AudioManager.STREAM_MUSIC, playbackGain)
+            AppLog.i("AapAudio: Playback ${gainName()} focus request result (legacy): ${if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) "GRANTED" else "FAILED"}")
             return result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
         }
     }

@@ -1631,6 +1631,14 @@ class Settings(private val context: Context) {
         get() = prefs.getBoolean("show-home-favorite-apps", true)
         set(value) { prefs.edit().putBoolean("show-home-favorite-apps", value).apply() }
 
+    /**
+     * The bento home: a fixed grid of music, Android Auto, Settings, Bluetooth, Radio and More apps
+     * instead of the paged home with favorites and widgets. On by default.
+     */
+    var homeLayoutBento: Boolean
+        get() = prefs.getBoolean("home-layout-bento", true)
+        set(value) { prefs.edit().putBoolean("home-layout-bento", value).apply() }
+
     /** Date and time on the home screen. Off by default: the driver asks for them. */
     var showHomeClock: Boolean
         get() = prefs.getBoolean("show-home-clock", false)

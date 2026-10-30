@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- An icon on a glass button: black once the button turns white (selected), white otherwise. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/tv_black" android:state_selected="true" />
+    <item android:color="@color/tv_white" />
+</selector>

@@ -196,30 +196,44 @@ class AppDrawerFragment : DialogFragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_app_drawer, container, false)
+    ): View? = inflater.inflate(
+        if (tvStyle(inflater.context)) R.layout.fragment_app_drawer_tv else R.layout.fragment_app_drawer,
+        container, false
+    )
+
+    /** The tvOS home has its own App Library look: glass tiles over the home's light. */
+    private fun tvStyle(context: Context): Boolean = App.provide(context).settings.homeLayoutBento
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val toolbar = view.findViewById<MaterialToolbar>(R.id.toolbar)
+        val tv = tvStyle(view.context)
+        val toolbar = view.findViewById<MaterialToolbar?>(R.id.toolbar)
         val rvApps = view.findViewById<RecyclerView>(R.id.rv_apps)
         val progressBar = view.findViewById<ProgressBar>(R.id.progress_bar)
         val tvEmpty = view.findViewById<TextView>(R.id.tv_empty)
 
-        toolbar.setNavigationOnClickListener {
+        toolbar?.setNavigationOnClickListener {
             closeDrawer()
         }
+        view.findViewById<View>(R.id.tv_drawer_back)?.setOnClickListener { closeDrawer() }
 
         val screenWidthDp = resources.displayMetrics.widthPixels / resources.displayMetrics.density
-        rvApps.layoutManager = GridLayoutManager(requireContext(), (screenWidthDp / 120).toInt().coerceAtLeast(3))
+        // Six tiles across a 1280dp head unit on the tvOS home, as in its reference.
+        val tileWidthDp = if (tv) 200 else 120
+        rvApps.layoutManager = GridLayoutManager(requireContext(), (screenWidthDp / tileWidthDp).toInt().coerceAtLeast(3))
 
         val favoriteSlot = arguments?.getInt(ARG_FAVORITE_SLOT, -1) ?: -1
-        if (favoriteSlot >= 0) toolbar.setTitle(R.string.home_choose_favorite_app)
+        if (favoriteSlot >= 0) {
+            toolbar?.setTitle(R.string.home_choose_favorite_app)
+            view.findViewById<TextView>(R.id.tv_drawer_title)?.setText(R.string.home_choose_favorite_app)
+        }
         val adapter = AppDrawerAdapter(
             emptyList(),
             viewLifecycleOwner.lifecycleScope,
             onItemClick = { app -> if (favoriteSlot >= 0) pickFavorite(favoriteSlot, app) else launchApp(app) },
-            onItemLongClick = { anchor, app -> if (favoriteSlot < 0) showAddToFavorites(anchor, app) }
+            onItemLongClick = { anchor, app -> if (favoriteSlot < 0) showAddToFavorites(anchor, app) },
+            itemLayout = if (tv) R.layout.item_app_drawer_tv else R.layout.item_app_drawer
         )
         rvApps.adapter = adapter
 
@@ -343,7 +357,8 @@ class AppDrawerAdapter(
     private var items: List<AppDrawerItem>,
     private val coroutineScope: CoroutineScope,
     private val onItemClick: (AppDrawerItem) -> Unit,
-    private val onItemLongClick: (View, AppDrawerItem) -> Unit
+    private val onItemLongClick: (View, AppDrawerItem) -> Unit,
+    private val itemLayout: Int = R.layout.item_app_drawer
 ) : RecyclerView.Adapter<AppDrawerAdapter.ViewHolder>() {
 
     @SuppressLint("NotifyDataSetChanged")
@@ -353,7 +368,12 @@ class AppDrawerAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_app_drawer, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(itemLayout, parent, false)
+        if (itemLayout == R.layout.item_app_drawer_tv) {
+            view.isClickable = true
+            view.isFocusable = true
+            com.andrerinas.openheadunit.main.bento.BentoUi.addPressFeedback(view, focusScale = 1.05f)
+        }
         return ViewHolder(view)
     }
 

@@ -26,6 +26,8 @@
         <item name="android:windowBackground">@drawable/splash_background</item>
         <item name="android:statusBarColor">@color/splash_background</item>
         <item name="android:navigationBarColor">@color/splash_background</item>
+        <!-- The launch window is drawn by the system before the app runs: hide the unit's bar there too. -->
+        <item name="android:windowFullscreen">true</item>
     </style>
 
     <style name="SplashTheme.Fullscreen" parent="SplashTheme">

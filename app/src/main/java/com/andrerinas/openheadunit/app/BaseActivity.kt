@@ -105,7 +105,34 @@ open class BaseActivity : AppCompatActivity() {
         } else {
             applyHudMirroring()
             applyWindowBackground()
+            applySystemBars()
         }
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        // A dialog, a toast or the notification shade can bring the bars back; hide them again.
+        if (hasFocus) applySystemBars()
+    }
+
+    /**
+     * Every screen of the app follows the fullscreen setting (immersive by default), not only the
+     * home and the projection, so the unit's top bar never shows inside the app.
+     */
+    protected fun applySystemBars() {
+        com.andrerinas.openheadunit.utils.SystemUI.applySystemBars(window, Settings(this).fullscreenMode)
+    }
+
+    /** How many opaque full-screen views (TvAmbientView) cover the window right now. */
+    private var opaqueContentCount = 0
+
+    /**
+     * An opaque view covers the whole window: drop the window background under it, which would
+     * otherwise be painted under every frame for nothing (a full-screen fill the GPU pays for).
+     */
+    fun setOpaqueContent(covered: Boolean) {
+        opaqueContentCount = (opaqueContentCount + if (covered) 1 else -1).coerceAtLeast(0)
+        applyWindowBackground()
     }
 
     protected fun applyHudMirroring() {
@@ -116,6 +143,10 @@ open class BaseActivity : AppCompatActivity() {
     fun applyWindowBackground() {
         val settings = Settings(this)
         currentHomeBackgroundImagePath = settings.homeBackgroundImagePath
+        if (opaqueContentCount > 0) {
+            window.setBackgroundDrawable(null)
+            return
+        }
         val path = settings.homeBackgroundImagePath
         val file = if (path.isNotEmpty()) File(path) else null
         val isNightActive = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES

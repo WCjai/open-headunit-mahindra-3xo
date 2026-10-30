@@ -437,6 +437,9 @@
     <string name="key_search">Voice Command</string>
     <string name="key_call">Phone (Accept)</string>
     <string name="key_endcall">End Call (Decline)</string>
+    <string name="key_volume_up">Volume Up</string>
+    <string name="key_volume_down">Volume Down</string>
+    <string name="key_volume_mute">Mute</string>
     <string name="key_music">Music</string>
     <string name="key_nav">Navigation</string>
     <string name="key_night">Toggle Night Mode</string>
@@ -1070,7 +1073,7 @@
     <string name="kill_on_disconnect">Close app on disconnect</string>
     <string name="kill_on_disconnect_description">Automatically close the app when Android Auto disconnects.</string>
     <string name="raise_projection_during_call">Stay in Android Auto during calls</string>
-    <string name="raise_projection_during_call_description">Self Mode only. Brings the projection back over the phone\'s call screen so calls are answered and ended in the Android Auto interface.</string>
+    <string name="raise_projection_during_call_description">Self Mode and TopWay units. Brings the projection back over the phone\'s or the car\'s Bluetooth call screen so calls are answered and ended in the Android Auto interface.</string>
     <string name="kill_on_disconnect_warning_title">Warning</string>
     <string name="kill_on_disconnect_warning">The following reconnection settings will conflict with closing the app on disconnect:\n\n%1$s\n\nYour initial connection settings (auto-connect, auto-start) will still work when the headunit turns on. However, after the first disconnection the app will close immediately instead of trying to reconnect.\n\nNote: Some aftermarket head units never fully shut down — they hibernate instead, similar to a phone that locks its screen but never actually powers off. With this option enabled, the app will close after the first disconnection and may not reopen automatically on the next ignition cycle.\n\nWould you like to disable the reconnection settings listed above?</string>
     <string name="kill_on_disconnect_disable_and_enable">Disable and enable</string>
@@ -1618,4 +1621,34 @@
     <string name="wifi_scan_legacy_limit">Renewal on Android 8–10\n• Request a pause on connection, then every five minutes while connected.\n• Android may enable searches between requests. The interval limits repeated cleanup work; it cannot keep every scan stopped.\n\nIf enabling searches fails, keep Shizuku running and retry. Rebooting resets this temporary control.</string>
     <string name="native_aa_candidate_android_radio_description">Use Android Bluetooth instead of automatically selecting the head unit Bluetooth module. Leave off for automatic selection. If a module connection option is enabled, turn it off first.</string>
     <string name="external_bt_candidate_transport_description">Force connection through the head unit Bluetooth module instead of automatic selection. This requires a compatible module service. Leave off to allow Android Bluetooth when that service does not respond; forcing this option prevents that fallback.</string>
+    <!-- TopWay steering-wheel learning (TopwayWheelActivity) -->
+    <string name="topway_wheel_title">Learn steering wheel (TopWay)</string>
+    <string name="topway_wheel_start">Start learning</string>
+    <string name="topway_wheel_end">End learning and save</string>
+    <string name="topway_wheel_impedance">Impedance (change it only if buttons are read wrongly, then learn again)</string>
+    <string name="topway_wheel_impedance_low">Low</string>
+    <string name="topway_wheel_impedance_high">High</string>
+    <string name="topway_wheel_clear">Forget all learned buttons</string>
+    <string name="topway_wheel_clear_confirm">Forget every learned steering-wheel button? They stop working everywhere until you learn them again.</string>
+    <string name="topway_wheel_help">1. Tap Start learning. 2. Tap a function on the right. 3. Press and hold that button on the steering wheel until it shows Learned. 4. Repeat for each button, then tap End learning and save. Learned buttons work in Android Auto straight away; Keymap can change what they do.</string>
+    <string name="topway_wheel_status_idle">Not learning. Tap Start learning to begin.</string>
+    <string name="topway_wheel_status_learning">Learning. Tap a function, then press its steering-wheel button.</string>
+    <string name="topway_wheel_status_waiting">Now press and hold the steering-wheel button for %1$s…</string>
+    <string name="topway_wheel_status_learned">%1$s learned.</string>
+    <string name="topway_wheel_status_no_answer">The steering-wheel controller did not answer. Your unit may use a different protocol.</string>
+    <string name="topway_wheel_status_unavailable">Cannot reach the steering-wheel controller: %1$s</string>
+    <string name="topway_wheel_quality">The last button was read poorly (level %1$d of 3). Try the other impedance and learn again.</string>
+    <string name="topway_wheel_start_first">Tap Start learning first</string>
+    <string name="topway_wheel_learned">Learned</string>
+    <string name="topway_wheel_not_learned">Not learned</string>
+    <string name="topway_wheel_press_now">Press it now…</string>
+    <string name="topway_wheel_status_sent">Sent. Waiting for the steering-wheel controller to confirm…</string>
+    <string name="topway_wheel_diag">%1$s · messages received: %2$d · last: %3$s</string>
+    <string name="topway_wheel_probe_trying">No answer yet. Trying %1$s…</string>
+    <string name="topway_wheel_probe_found">Connected using %1$s. Messages from the controller now arrive.</string>
+    <string name="topway_wheel_probe_none">No variant received messages (%1$s). Commands are still sent. Export the log from Settings and send it.</string>
+    <string name="topway_overlay_row">Display over other apps</string>
+    <string name="topway_overlay_allowed">Allowed</string>
+    <string name="topway_overlay_not_allowed">Not allowed. Tap to allow it, so Android Auto can come back over the car\'s call screen.</string>
+    <string name="topway_overlay_needed">Allow \"Display over other apps\" for Open Headunit (Settings, Apps, Special access) so it can come back over the car\'s call screen.</string>
 </resources>

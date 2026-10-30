@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The tvOS-style home, radio and app library (from ui/tvos_dashboard.html): white glass over
+    indigo, pink and blue light, Inter type, large rounded cards.
+-->
+<resources>
+    <color name="tv_white">#FFFFFFFF</color>
+    <color name="tv_white_90">#E6FFFFFF</color>
+    <color name="tv_white_80">#CCFFFFFF</color>
+    <color name="tv_white_70">#B3FFFFFF</color>
+    <color name="tv_white_60">#99FFFFFF</color>
+    <color name="tv_white_50">#80FFFFFF</color>
+    <color name="tv_white_40">#66FFFFFF</color>
+    <color name="tv_white_20">#33FFFFFF</color>
+    <color name="tv_white_10">#1AFFFFFF</color>
+    <color name="tv_white_05">#0DFFFFFF</color>
+    <color name="tv_glass">#12FFFFFF</color>
+    <color name="tv_glass_focus">#26FFFFFF</color>
+    <color name="tv_glass_edge">#21FFFFFF</color>
+    <color name="tv_glass_btn">#1FFFFFFF</color>
+    <color name="tv_glass_btn_pressed">#40FFFFFF</color>
+    <color name="tv_glass_btn_edge">#29FFFFFF</color>
+    <color name="tv_menu">#FF1C1C1E</color>
+    <color name="tv_black">#FF000000</color>
+    <color name="tv_base">#FF08080F</color>
+    <color name="tv_blob_indigo">#FF5A67D8</color>
+    <color name="tv_blob_pink">#FFD53F8C</color>
+    <color name="tv_blob_blue">#FF3182CE</color>
+    <color name="tv_accent_blue">#FF60A5FA</color>
+    <color name="tv_accent_green">#FF4ADE80</color>
+    <color name="tv_accent_red">#FFF87171</color>
+    <color name="tv_station_blue">#FF7CB8FF</color>
+    <color name="tv_connected_text">#FF86EFAC</color>
+    <color name="tv_connected_icon">#FF15803D</color>
+    <color name="tv_scrim">#80000000</color>
+    <color name="tv_veil">#73000000</color>
+
+    <dimen name="tv_pad_h">18dp</dimen>
+    <dimen name="tv_gap">14dp</dimen>
+    <dimen name="tv_card_radius">28dp</dimen>
+    <dimen name="tv_btn_radius">14dp</dimen>
+    <dimen name="tv_art_radius">24dp</dimen>
+    <dimen name="tv_tile_icon">88dp</dimen>
+
+    <!-- Holds the Android Auto card's pulse animator, so a repaint does not start a second one. -->
+    <item name="tv_pulse_animator" type="id" />
+    <!-- The Home button floating over Android Auto's top-right corner. -->
+    <item name="projection_home_button" type="id" />
+
+    <style name="TvText">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:fontFamily">@font/inter_regular</item>
+        <item name="android:textColor">@color/tv_white</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+
+    <!-- Small caps label: "NOW PLAYING", "FM RADIO" -->
+    <style name="TvText.Kicker">
+        <item name="android:textSize">11sp</item>
+        <item name="android:fontFamily">@font/inter_bold</item>
+        <item name="android:letterSpacing">0.16</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">@color/tv_white_60</item>
+    </style>
+
+    <style name="TvGlassButton">
+        <item name="android:background">@drawable/tv_glass_btn_bg</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="TvGlassButton.Text">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">42dp</item>
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:paddingRight">16dp</item>
+        <item name="android:fontFamily">@font/inter_semibold</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/tv_glass_text</item>
+        <item name="android:letterSpacing">0.02</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+
+    <style name="TvMenuItem">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">62dp</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingLeft">18dp</item>
+        <item name="android:paddingRight">18dp</item>
+        <item name="android:background">@drawable/tv_menu_item_bg</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+
+    <style name="TvMenuIcon">
+        <item name="android:layout_width">22dp</item>
+        <item name="android:layout_height">22dp</item>
+        <item name="android:layout_marginLeft">6dp</item>
+        <item name="android:layout_marginRight">20dp</item>
+        <item name="android:importantForAccessibility">no</item>
+    </style>
+
+    <style name="TvMenuTitle" parent="TvText">
+        <item name="android:textSize">16sp</item>
+        <item name="android:fontFamily">@font/inter_medium</item>
+        <item name="android:textColor">@color/tv_white_90</item>
+    </style>
+
+    <style name="TvMenuSubtitle" parent="TvText">
+        <item name="android:layout_marginTop">4dp</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/tv_white_50</item>
+    </style>
+
+    <!-- A borderless media button on a card: previous, next, seek. -->
+    <style name="TvIconButton">
+        <item name="android:layout_width">48dp</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:padding">11dp</item>
+        <item name="android:background">@drawable/tv_icon_btn_bg</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:alpha">0.85</item>
+    </style>
+
+    <style name="ShapeAppearance.Tv.Art" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/tv_art_radius</item>
+    </style>
+
+    <string name="tv_now_playing">Now Playing</string>
+    <string name="tv_menu">Menu</string>
+    <string name="tv_menu_bluetooth">Bluetooth</string>
+    <string name="tv_menu_bluetooth_detail">TopWay Bluetooth app</string>
+    <string name="tv_menu_android_settings">Android Settings</string>
+    <string name="tv_menu_android_settings_detail">The unit\'s system settings</string>
+    <string name="tv_menu_headunit_settings">Head Unit Settings</string>
+    <string name="tv_menu_headunit_settings_detail">Open Headunit\'s own settings</string>
+    <string name="tv_app_library">App Library</string>
+    <string name="tv_home">Home</string>
+    <string name="tv_back_to_home">Back to home</string>
+    <string name="tv_radio">Radio</string>
+    <string name="tv_android_auto">Android Auto</string>
+    <string name="tv_aa_connected">Connected</string>
+    <string name="tv_bt_on">Phone connected over Bluetooth</string>
+    <string name="tv_bt_off">No phone on Bluetooth</string>
+    <string name="tv_wifi_on">Wi-Fi connected</string>
+    <string name="tv_wifi_off">Wi-Fi not connected</string>
+    <string name="tv_source_aa">Android Auto</string>
+    <string name="tv_source_bt">Bluetooth</string>
+    <string name="tv_source_radio">Radio</string>
+    <string name="tv_nothing_playing">Nothing playing</string>
+    <string name="tv_connect_to_play">Connect your phone to play music</string>
+    <string name="tv_previous">Previous</string>
+    <string name="tv_next">Next</string>
+    <string name="tv_play_pause">Play or pause</string>
+    <string name="tv_decline">Decline</string>
+    <string name="tv_end_call">End</string>
+    <string name="tv_call_kicker">%1$s · Bluetooth</string>
+
+    <string name="tv_radio_fm_title">FM Radio</string>
+    <string name="tv_radio_am_title">AM Radio</string>
+    <string name="tv_radio_tuning">Currently tuning</string>
+    <string name="tv_radio_off">Radio off</string>
+    <string name="tv_radio_power">Turn the radio on or off</string>
+    <string name="tv_radio_hint">Tap to tune · hold a station to save the one playing</string>
+</resources>

@@ -45,6 +45,8 @@ import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.BluetoothHelper
 import com.andrerinas.openheadunit.utils.CarLauncherManager
 import com.andrerinas.openheadunit.connection.self.SelfModeCallRaisePolicy
+import com.andrerinas.openheadunit.connection.carkey.topway.TopwayBluetooth
+import com.andrerinas.openheadunit.connection.carkey.topway.CarTopwayReceiver
 import com.andrerinas.openheadunit.connection.usb.UsbSwitchClaim
 import com.andrerinas.openheadunit.decoder.audio.CallState
 import com.andrerinas.openheadunit.utils.IntentFilters
@@ -79,6 +81,7 @@ import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.ExternalBtTran
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeAaHandshakeManager
 import java.io.File
 import kotlin.math.abs
+import com.andrerinas.openheadunit.app.ServiceStarts
 
 class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, VideoDimensionsListener {
 
@@ -1132,14 +1135,17 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                             // Don't leave the renderer bar floating over the reconnecting/exit UI;
                             // if the renderer is still broken after a reconnect it re-offers itself.
                             dismissRendererConfirmBanner()
-                            if (!state.isClean && !state.isUserExit && !state.isSettingsRestart) {
-                                AppLog.w("AapProjectionActivity: Disconnected unexpectedly.")
-                                ToastUtils.showToast(this@AapProjectionActivity, getString(R.string.wifi_disconnect_toast), Toast.LENGTH_LONG)
-                            }
-                            // Only finish immediately if the user explicitly exited, it was a clean close, or killOnDisconnect is enabled.
-                            if (!state.isSettingsRestart && (state.isUserExit || state.isClean || settings.killOnDisconnect)) {
-                                AppLog.i("AapProjectionActivity: Finishing because state isUserExit=${state.isUserExit}, isClean=${state.isClean}, killOnDisconnect=${settings.killOnDisconnect}")
+                            // The phone went away (cable pulled, phone ended it, or the user exited):
+                            // straight back to the home screen, with no toast and no reconnect wait.
+                            // Only a restart for changed settings keeps the screen and waits.
+                            if (!state.isSettingsRestart) {
+                                AppLog.i("AapProjectionActivity: Phone disconnected (isUserExit=${state.isUserExit}, isClean=${state.isClean}), returning to the home screen")
                                 hideReconnectingOverlay("the session ended")
+                                startActivity(Intent(this@AapProjectionActivity, MainActivity::class.java).apply {
+                                    action = Intent.ACTION_MAIN
+                                    addCategory(Intent.CATEGORY_HOME)
+                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                                })
                                 finish()
                             } else {
                                 // Show the reconnecting overlay immediately. How long it stays is
@@ -1225,6 +1231,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
 
         container.addView(overlayView)
         overlayView.requestFocus()
+        if (settings.homeLayoutBento) addHomeButton(container)
         setFullscreen() // Call setFullscreen here as well
 
         val loadingOverlay = findViewById<View>(R.id.loading_overlay)
@@ -1840,7 +1847,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         val intent = Intent(this, AapService::class.java).apply {
             action = AapService.ACTION_END_SESSION_STAY_ARMED
         }
-        ContextCompat.startForegroundService(this, intent)
+        ServiceStarts.start(this, intent)
         ToastUtils.showToast(this, R.string.exit_dialog_end_stay_armed_note, Toast.LENGTH_LONG, force = true)
         finish()
     }
@@ -1850,7 +1857,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         val intent = Intent(this, AapService::class.java).apply {
             action = AapService.ACTION_NATIVE_AA_SWITCH_DEVICE
         }
-        ContextCompat.startForegroundService(this, intent)
+        ServiceStarts.start(this, intent)
         finish()
     }
 
@@ -1906,6 +1913,52 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
             packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
 
+    /**
+     * The tvOS home's Home button: a small dark-glass circle over Android Auto's top-right corner.
+     * Added after the touch overlay, so it sits above it and its taps never reach the phone; every
+     * other touch still goes to Android Auto. Not focusable, so the D-pad and wheel keys stay with
+     * the overlay.
+     */
+    private fun addHomeButton(container: FrameLayout) {
+        val density = resources.displayMetrics.density
+        val size = (52 * density).toInt()
+        val margin = (12 * density).toInt()
+        val padding = (15 * density).toInt()
+        // Android Auto puts its rail on the driver's side, so the button takes the top corner on
+        // the other side: top-left in a right-hand-drive car, top-right otherwise.
+        val side = if (settings.rightHandDrive) android.view.Gravity.LEFT else android.view.Gravity.RIGHT
+        val button = android.widget.ImageView(this).apply {
+            id = R.id.projection_home_button
+            setImageResource(R.drawable.tv_ic_home)
+            setColorFilter(android.graphics.Color.BLACK)
+            setBackgroundResource(R.drawable.tv_home_button_bg)
+            setPadding(padding, padding, padding, padding)
+            contentDescription = getString(R.string.tv_back_to_home)
+            isClickable = true
+            isFocusable = false
+            if (Build.VERSION.SDK_INT >= 21) elevation = 6 * density
+            layoutParams = FrameLayout.LayoutParams(size, size, android.view.Gravity.TOP or side).apply {
+                topMargin = margin
+                leftMargin = margin
+                rightMargin = margin
+            }
+            setOnClickListener { goHomeKeepingSession() }
+        }
+        container.addView(button)
+    }
+
+    /** Back to Open Headunit's home with Android Auto still connected; "Back to Android Auto" returns. */
+    private fun goHomeKeepingSession() {
+        AppLog.i("AapProjectionActivity: Home button, showing the home; the session keeps running")
+        // Our own home by name, as moveToBackground does when this app is the launcher: the system's
+        // home intent could land on the factory launcher instead.
+        startActivity(Intent(this, MainActivity::class.java).apply {
+            action = Intent.ACTION_MAIN
+            addCategory(Intent.CATEGORY_HOME)
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        })
+    }
+
     private fun moveToBackground() {
         // Sending the home intent by itself leaves the front to whichever home app the system picks,
         // and on a unit that still has the factory launcher as its default that is not this app: the
@@ -1931,9 +1984,11 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         if (isInPictureInPictureMode) {
             // Hide UI elements during PiP (like FPS counter, loading overlay)
             findViewById<View>(R.id.loading_overlay)?.visibility = View.GONE
+            findViewById<View>(R.id.projection_home_button)?.visibility = View.GONE
             stopCustomLoadingMedia()
             performanceOverlay.setVisible(false)
         } else {
+            findViewById<View>(R.id.projection_home_button)?.visibility = View.VISIBLE
             // Restore UI if needed
             performanceOverlay.setVisible(settings.showPerformanceOverlay)
             setFullscreen()
@@ -1951,12 +2006,20 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     private fun maybeOpenCallRaiseEpisode(fromModeChange: Boolean = false) {
         if (!fromModeChange) closeCallRaiseEpisode("covered again")
 
+        // A TopWay unit's own service opens its phone screen without FLAG_ACTIVITY_NO_USER_ACTION,
+        // so Android reports that cover as the user leaving. When it follows the wheel's call
+        // button or a call on the unit, it was not the user, and must not count as one.
+        val topwayCallCover = topwayCallActive()
+        if (userLeftDeliberately && topwayCallCover) {
+            AppLog.i("AapProjectionActivity: the 'user left' hint came from the unit's phone screen, not the user")
+        }
         val verdict = SelfModeCallRaisePolicy.coverVerdict(
-            userLeft = userLeftDeliberately,
+            userLeft = userLeftDeliberately && !topwayCallCover,
             selfMode = AapService.instance?.isSelfModeActive() == true,
             pipActive = App.isPiPActive,
             enabled = settings.raiseProjectionDuringCall,
             episodeOpen = callRaiseEpisode != null,
+            topwayCallScreen = App.provide(this).topwayCallBridge.isAvailable,
         )
         if (verdict != SelfModeCallRaisePolicy.CoverVerdict.OPEN) {
             // Every cover accounts for itself, or a raise that never happens leaves nothing to read
@@ -1968,7 +2031,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         }
 
         val audioMode = audioModeOrNormal()
-        val callActive = CallState.isCallActive(audioMode, MicRecorder.holdsCommunicationMode)
+        val callActive = CallState.isCallActive(audioMode, MicRecorder.holdsCommunicationMode) || topwayCallActive()
         val nowMs = SystemClock.elapsedRealtime()
         val carried = SelfModeCallRaisePolicy.carriedAttempts(lastCallRaiseAttempts, lastCallRaiseAtMs, nowMs)
         val what = if (callActive) "covered during a call" else "covered, watching for a call"
@@ -1979,8 +2042,14 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             attempts = carried,
             lastAttemptAtMs = if (carried > 0) lastCallRaiseAtMs else 0L,
         )
-        watchdogHandler.postDelayed(callRaiseTick, SelfModeCallRaisePolicy.TICK_MS)
+        watchdogHandler.postDelayed(callRaiseTick, raiseTiming().tickMs)
     }
+
+    /** TopWay's phone screen settles within ~100ms of the button, so it is answered sooner than Self Mode's. */
+    private fun raiseTiming(): SelfModeCallRaisePolicy.Timing =
+        if (AapService.instance?.isSelfModeActive() != true && App.provide(this).topwayCallBridge.isAvailable) {
+            SelfModeCallRaisePolicy.Timing.TOPWAY
+        } else SelfModeCallRaisePolicy.Timing.SELF_MODE
 
     /**
      * Ends an open episode. The reason is logged only when there was one, because a successful raise
@@ -1997,7 +2066,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
     private fun tickCallRaise() {
         val episode = callRaiseEpisode ?: return
         val nowMs = SystemClock.elapsedRealtime()
-        val callActive = CallState.isCallActive(audioModeOrNormal(), MicRecorder.holdsCommunicationMode)
+        val callActive = CallState.isCallActive(audioModeOrNormal(), MicRecorder.holdsCommunicationMode) || topwayCallActive()
         val observed = SelfModeCallRaisePolicy.observe(episode, nowMs, callActive)
         val action = SelfModeCallRaisePolicy.decide(
             nowMs = nowMs,
@@ -2005,6 +2074,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             callActive = callActive,
             isForeground = isForeground,
             pipActive = App.isPiPActive,
+            timing = raiseTiming(),
         )
         val reason = SelfModeCallRaisePolicy.describe(action, observed, callActive, isForeground)
 
@@ -2025,7 +2095,7 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
             SelfModeCallRaisePolicy.Action.WAIT -> observed
         }
         callRaiseEpisode = next
-        watchdogHandler.postDelayed(callRaiseTick, SelfModeCallRaisePolicy.nextTickDelayMs(next))
+        watchdogHandler.postDelayed(callRaiseTick, SelfModeCallRaisePolicy.nextTickDelayMs(next, raiseTiming()))
     }
 
     /** The service owns the overlay trampoline, and a paused activity cannot start itself. */
@@ -2056,13 +2126,45 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
                 CallState.isCallStarting(mode)
             if (!isForeground && callish) maybeOpenCallRaiseEpisode(fromModeChange = true)
         }
+        // TopWay: the call runs on the car's Bluetooth module, so Android's audio mode never shows
+        // it. The unit's Bluetooth app announces it instead, at the moment its call screen opens.
+        val listener: (TopwayBluetooth.CallState) -> Unit = { state ->
+            if (!isForeground && state.inCall) maybeOpenCallRaiseEpisode(fromModeChange = true)
+        }
+        topwayCallListener = listener
+        App.provide(this).topwayCallBridge.onCallStateChanged = listener
+        // The wheel's answer/hang-up button makes the unit open its phone screen over us, whether or
+        // not the call is on the unit's Bluetooth. The press itself is the signal.
+        val keyListener: () -> Unit = {
+            if (!isForeground) maybeOpenCallRaiseEpisode(fromModeChange = true)
+        }
+        topwayWheelKeyListener = keyListener
+        CarTopwayReceiver.onWheelCallKey = keyListener
     }
 
     private fun unregisterAudioModeListener() {
+        val bridge = App.provide(this).topwayCallBridge
+        // Only our own: a relaunched instance may already have put its listener there.
+        if (bridge.onCallStateChanged === topwayCallListener) bridge.onCallStateChanged = null
+        topwayCallListener = null
+        if (CarTopwayReceiver.onWheelCallKey === topwayWheelKeyListener) CarTopwayReceiver.onWheelCallKey = null
+        topwayWheelKeyListener = null
         val handle = audioModeWatcher ?: return
         audioModeWatcher = null
         AudioModeWatcher.stop(handle)
     }
+
+    private var topwayCallListener: ((TopwayBluetooth.CallState) -> Unit)? = null
+    private var topwayWheelKeyListener: (() -> Unit)? = null
+
+    /**
+     * A TopWay unit's phone screen is expected over us: a call on its Bluetooth module, or the
+     * wheel's answer / hang-up button pressed moments ago (the unit opens its phone screen on that
+     * press even when the call is not on its module). Never true elsewhere.
+     */
+    private fun topwayCallActive(): Boolean =
+        App.provide(this).topwayCallBridge.callState.inCall ||
+            TopwayBluetooth.wheelCallKeyRecent(SystemClock.elapsedRealtime(), CarTopwayReceiver.lastWheelCallKeyAtMs)
 
     override fun onUserLeaveHint() {
         // Optional: Auto-enter PiP if user presses home

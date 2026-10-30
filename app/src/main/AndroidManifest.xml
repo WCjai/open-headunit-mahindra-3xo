@@ -240,10 +240,34 @@
             </intent-filter>
         </activity-alias>
 
+        <!-- Bento home screens for TopWay units: the car's Bluetooth and radio inside this app.
+             Each in its own task, so the unit's phone screen can be lifted off it again. -->
+        <activity
+            android:name=".main.bento.BentoBluetoothActivity"
+            android:configChanges="keyboardHidden|uiMode|orientation|screenSize"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:taskAffinity="com.andrerinas.openheadunit.bento.bluetooth"
+            android:theme="@style/AppTheme" />
+
+        <activity
+            android:name=".main.bento.BentoRadioActivity"
+            android:configChanges="keyboardHidden|uiMode|orientation|screenSize"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:taskAffinity="com.andrerinas.openheadunit.bento.radio"
+            android:theme="@style/AppTheme" />
+
         <activity
             android:name=".main.SettingsActivity"
             android:label="@string/settings"
             android:windowSoftInputMode="stateHidden|adjustResize"
+            android:theme="@style/AppTheme" />
+
+        <activity
+            android:name=".main.TopwayWheelActivity"
+            android:exported="false"
+            android:label="@string/topway_wheel_title"
             android:theme="@style/AppTheme" />
 
         <!--

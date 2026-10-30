@@ -116,4 +116,19 @@ object PlaybackFocusPolicy {
     const val SELF_DEFEATING_LIMIT = 2
 
     const val SELF_DEFEATING_WINDOW_MS = 5_000L
+
+    /**
+     * Which focus the dynamic playback path asks for.
+     *
+     * Transient everywhere else, so the car radio pauses and resumes around Android Auto audio. On a
+     * TopWay unit that leaves the unit's own source active: its system service (`com.tw.service`)
+     * only switches the MCU to the Android source (`write(769, 192, 0)`) and starts turning
+     * steering-wheel Next / Previous / Play into Android media key events on a *permanent* loss.
+     * Under a transient loss it merely ducks, so the wheel keeps driving the radio or Bluetooth
+     * music and Android Auto never sees a press. Permanent focus there is what every Android player
+     * on those units takes.
+     */
+    fun playbackFocusGain(topwayUnit: Boolean): Int =
+        if (topwayUnit) android.media.AudioManager.AUDIOFOCUS_GAIN
+        else android.media.AudioManager.AUDIOFOCUS_GAIN_TRANSIENT
 }

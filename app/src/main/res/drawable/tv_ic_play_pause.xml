@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Play and pause in one: the Bluetooth module reports no play state, so one button does both. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="#FFFFFFFF" android:pathData="M2,5l8,7 -8,7z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M13,5h3v14h-3zM19,5h3v14h-3z" />
+</vector>

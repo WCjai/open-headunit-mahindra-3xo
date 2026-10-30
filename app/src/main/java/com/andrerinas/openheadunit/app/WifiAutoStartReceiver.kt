@@ -79,7 +79,7 @@ class WifiAutoStartReceiver : BroadcastReceiver() {
                 // Start the service
                 val serviceIntent = Intent(context, AapService::class.java)
                 try {
-                    ContextCompat.startForegroundService(context, serviceIntent)
+                    ServiceStarts.start(context, serviceIntent)
                 } catch (e: Exception) {
                     AppLog.e("Failed to start AapService from background: ${e.message}")
                 }

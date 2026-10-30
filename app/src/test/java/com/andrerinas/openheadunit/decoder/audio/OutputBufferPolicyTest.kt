@@ -34,6 +34,20 @@ class OutputBufferPolicyTest {
         assertEquals(7680, policy.update(3, 3))
     }
 
+    @Test fun `a resampled slow-path floor gets half its size again as headroom`() {
+        // TopWay/Allwinner: 48 kHz track on a 44.1 kHz HAL, fast mixer refused, platform minimum
+        // 5928 frames. Two 10ms steps (ceiling 7200) were used up while underruns kept coming.
+        val policy = OutputBufferPolicy(48000, 480, 5928)
+        assertEquals(6240, policy.update(0, 0))
+        assertEquals(9600, policy.maximumFrames)
+        repeat(20) { policy.update(1L + it, it + 1) }
+        assertEquals(9600, policy.targetFrames)
+    }
+
+    @Test fun `a floor at sixty milliseconds keeps the two-step ceiling`() {
+        assertEquals(4800, OutputBufferPolicy(48000, 960, 2880).maximumFrames)
+    }
+
     @Test fun `a reset xrun counter restarts the stability interval`() {
         val policy = OutputBufferPolicy(48000, 192, 576)
         policy.update(0, 0)

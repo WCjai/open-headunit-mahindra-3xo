@@ -90,6 +90,7 @@ import com.andrerinas.openheadunit.connection.CommManager
 import com.andrerinas.openheadunit.connection.PhoneExitQuietPolicy
 import kotlinx.coroutines.isActive
 import kotlin.math.roundToInt
+import com.andrerinas.openheadunit.app.ServiceStarts
 
 class HomeFragment : Fragment() {
 
@@ -123,6 +124,8 @@ class HomeFragment : Fragment() {
     private lateinit var exitButton: View
     private lateinit var appsButton: View
     private var primaryAction: View? = null
+    /** The bento home's own parts (music, tiles, call card); null on the paged home. */
+    private var bento: com.andrerinas.openheadunit.main.bento.BentoHomeController? = null
     private var primaryCancel: View? = null
     private lateinit var favoriteSlots: List<View>
     private var decision: HomePrimaryPolicy.Decision? = null
@@ -216,7 +219,12 @@ class HomeFragment : Fragment() {
 
     private fun inflateHomeContent(container: FrameLayout) {
         cachedPalette = null
-        LayoutInflater.from(container.context).inflate(R.layout.fragment_home, container, true)
+        bento?.onDestroyView()
+        bento = null
+        val bentoHome = App.provide(container.context).settings.homeLayoutBento
+        LayoutInflater.from(container.context).inflate(
+            if (bentoHome) R.layout.fragment_home_bento else R.layout.fragment_home, container, true
+        )
         selfModeTile = container.findViewById(R.id.self_mode_button)
         usbTile = container.findViewById(R.id.usb_button)
         settingsTile = container.findViewById(R.id.settings_button)
@@ -243,12 +251,19 @@ class HomeFragment : Fragment() {
         // never calls a long-click listener of its own, so the empty space past the last widget
         // would swallow the press. Long-clickable is not focusable, so the D-pad does not stop there.
         // Only a long press: a tap there still does nothing.
-        listOf(
-            R.id.home_primary_card, R.id.home_page_main, R.id.home_favorites_area, R.id.home_widgets_row
-        ).forEach { id ->
-            container.findViewById<View>(id)?.setOnLongClickListener { showPageMenu(widgetPage = null) }
+        if (!bentoHome) {
+            listOf(
+                R.id.home_primary_card, R.id.home_page_main, R.id.home_favorites_area, R.id.home_widgets_row
+            ).forEach { id ->
+                container.findViewById<View>(id)?.setOnLongClickListener { showPageMenu(widgetPage = null) }
+            }
         }
         setupListeners()
+        if (bentoHome) {
+            bento = com.andrerinas.openheadunit.main.bento.BentoHomeController(
+                container, openAppDrawer = { openAppDrawer() }, openProjection = { openProjection() }
+            ).also { it.onViewCreated() }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -313,7 +328,7 @@ class HomeFragment : Fragment() {
         val appSettings = App.provide(requireContext()).settings
 
         if (appSettings.autoStartOnScreenOn || appSettings.autoStartOnBoot) {
-            ContextCompat.startForegroundService(requireContext(),
+            ServiceStarts.start(requireContext(),
                 Intent(requireContext(), AapService::class.java))
         }
 
@@ -482,6 +497,7 @@ class HomeFragment : Fragment() {
         // Cancel, the progress bar and the step come and go with the status, so the lines that fit
         // change with it, not only with the layout.
         scheduleCardFit(root)
+        bento?.onConnectionChanged()
     }
 
     /**
@@ -1141,6 +1157,8 @@ class HomeFragment : Fragment() {
 
     /** Loads only the four favorites, off the main thread: the drawer's full list is not needed here. */
     private fun loadFavorites() {
+        // The bento home has no favorite slots; More apps holds every app.
+        if (favoriteSlots.isEmpty()) return
         val ctx = requireContext().applicationContext
         val pm = ctx.packageManager
         val appSettings = App.provide(requireContext()).settings
@@ -1619,7 +1637,7 @@ class HomeFragment : Fragment() {
     private fun startSelfModeInternal() {
         val intent = Intent(requireContext(), AapService::class.java)
         intent.action = AapService.ACTION_START_SELF_MODE
-        ContextCompat.startForegroundService(requireContext(), intent)
+        ServiceStarts.start(requireContext(), intent)
         AppLog.i("Auto start selfmode")
     }
 
@@ -1692,7 +1710,7 @@ class HomeFragment : Fragment() {
                         AppLog.i("Auto-connect: Attempting WiFi connection to $ip")
                         ToastUtils.showToast(ctx, getString(R.string.auto_connecting_to, ip), Toast.LENGTH_SHORT)
                         lifecycleScope.launch(Dispatchers.IO) { App.provide(ctx).commManager.connect(ip, 5277) }
-                        ContextCompat.startForegroundService(ctx, Intent(ctx, AapService::class.java).apply {
+                        ServiceStarts.start(ctx, Intent(ctx, AapService::class.java).apply {
                             action = AapService.ACTION_CONNECT_SOCKET
                         })
                         true
@@ -1712,7 +1730,7 @@ class HomeFragment : Fragment() {
                     if (usbManager != null && matchingDevice != null && usbManager.hasPermission(matchingDevice)) {
                         AppLog.i("Auto-connect: Attempting USB connection to $lastUsbDevice")
                         ToastUtils.showToast(requireContext(), getString(R.string.auto_connecting_usb), Toast.LENGTH_SHORT)
-                        ContextCompat.startForegroundService(requireContext(), Intent(requireContext(), AapService::class.java).apply {
+                        ServiceStarts.start(requireContext(), Intent(requireContext(), AapService::class.java).apply {
                             action = AapService.ACTION_CHECK_USB
                         })
                         true
@@ -1745,7 +1763,7 @@ class HomeFragment : Fragment() {
             commManager.isConnected) return false
 
         AppLog.i("HomeFragment: Requesting single-USB auto-connect via AapService")
-        ContextCompat.startForegroundService(ctx,
+        ServiceStarts.start(ctx,
             Intent(ctx, AapService::class.java).apply {
                 action = AapService.ACTION_CHECK_USB
             })
@@ -1805,12 +1823,12 @@ class HomeFragment : Fragment() {
             val disconnectIntent = Intent(requireContext(), AapService::class.java).apply {
                 action = AapService.ACTION_DISCONNECT
             }
-            ContextCompat.startForegroundService(requireContext(), disconnectIntent)
+            ServiceStarts.start(requireContext(), disconnectIntent)
         } else {
             val stopServiceIntent = Intent(requireContext(), AapService::class.java).apply {
                 action = AapService.ACTION_STOP_SERVICE
             }
-            ContextCompat.startForegroundService(requireContext(), stopServiceIntent)
+            ServiceStarts.start(requireContext(), stopServiceIntent)
         }
         requireActivity().finishAffinity()
     }
@@ -1870,7 +1888,7 @@ class HomeFragment : Fragment() {
             )
 
             if (device.isInAccessoryMode) {
-                ContextCompat.startForegroundService(requireContext(),
+                ServiceStarts.start(requireContext(),
                     Intent(requireContext(), AapService::class.java).apply {
                         action = AapService.ACTION_CHECK_USB
                     })
@@ -1892,7 +1910,7 @@ class HomeFragment : Fragment() {
                     }
                 } else {
                     ToastUtils.showToast(requireContext(), R.string.requesting_usb_permission, Toast.LENGTH_SHORT)
-                    ContextCompat.startForegroundService(requireContext(), Intent(requireContext(), AapService::class.java))
+                    ServiceStarts.start(requireContext(), Intent(requireContext(), AapService::class.java))
                     usbManager.requestPermission(
                         device.wrappedDevice,
                         UsbReceiver.createPermissionPendingIntent(requireContext())
@@ -1932,7 +1950,7 @@ class HomeFragment : Fragment() {
                     val intent = Intent(requireContext(), AapService::class.java).apply {
                         action = AapService.ACTION_START_WIRELESS_SCAN
                     }
-                    ContextCompat.startForegroundService(requireContext(), intent)
+                    ServiceStarts.start(requireContext(), intent)
                 }
             }
             WifiLauncherMode.HELPER -> { // Helper (Wireless Launcher)
@@ -1949,7 +1967,7 @@ class HomeFragment : Fragment() {
                             val intent = Intent(requireContext(), AapService::class.java).apply {
                                 action = AapService.ACTION_START_WIRELESS_SCAN
                             }
-                            ContextCompat.startForegroundService(requireContext(), intent)
+                            ServiceStarts.start(requireContext(), intent)
                         }
                         com.andrerinas.openheadunit.utils.ShareHotspotQrDialog.show(
                             requireContext()
@@ -1968,7 +1986,7 @@ class HomeFragment : Fragment() {
                         val intent = Intent(requireContext(), AapService::class.java).apply {
                             action = AapService.ACTION_START_WIRELESS_SCAN
                         }
-                        ContextCompat.startForegroundService(requireContext(), intent)
+                        ServiceStarts.start(requireContext(), intent)
                     }
                 }
             }
@@ -1983,7 +2001,7 @@ class HomeFragment : Fragment() {
                     val intent = Intent(requireContext(), AapService::class.java).apply {
                         action = AapService.ACTION_NATIVE_AA_POKE
                     }
-                    ContextCompat.startForegroundService(requireContext(), intent)
+                    ServiceStarts.start(requireContext(), intent)
                 } else if (route == ExternalBtTransportPolicy.WifiButton.REFUSED) {
                     AppLog.i(
                         "HomeFragment: WiFi button refused: route=$route, daemon answer=" +
@@ -2062,6 +2080,7 @@ class HomeFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         AppLog.i("HomeFragment: onResume. isConnected=${commManager.isConnected}")
+        bento?.onResume()
         val root = requireView()
         val homeSettings = App.provide(requireContext()).settings
         applyLayoutSettings(root, homeSettings)
@@ -2104,6 +2123,8 @@ class HomeFragment : Fragment() {
     private fun maybeShowPagesHint() {
         val ctx = context ?: return
         val root = view as? FrameLayout ?: return
+        // The bento home has no pages to point out.
+        if (bento != null) return
         if (pagesHint != null || !isResumed) return
         val appSettings = App.provide(ctx).settings
         val main = activity as? MainActivity
@@ -2351,6 +2372,8 @@ class HomeFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        bento?.onDestroyView()
+        bento = null
         noticesLayoutListener?.let { activity?.findViewById<View>(R.id.status_notices)?.removeOnLayoutChangeListener(it) }
         noticesLayoutListener = null
         // The next view builds its widgets again; the host must not keep this one's alive.
@@ -2373,6 +2396,7 @@ class HomeFragment : Fragment() {
 
     override fun onPause() {
         super.onPause()
+        bento?.onPause()
         driverCountdownTimer?.cancel()
         driverCountdownTimer = null
         stopHomeInfo()
@@ -2735,7 +2759,7 @@ class HomeFragment : Fragment() {
             val cancelIntent = Intent(requireContext(), AapService::class.java).apply {
                 action = AapService.ACTION_NATIVE_AA_CANCEL_POKE
             }
-            ContextCompat.startForegroundService(requireContext(), cancelIntent)
+            ServiceStarts.start(requireContext(), cancelIntent)
         }
 
         val dialog = MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
@@ -2762,7 +2786,7 @@ class HomeFragment : Fragment() {
                 val dismissIntent = Intent(ctx, AapService::class.java).apply {
                     action = AapService.ACTION_NATIVE_AA_PROMPT_DISMISSED
                 }
-                ContextCompat.startForegroundService(ctx, dismissIntent)
+                ServiceStarts.start(ctx, dismissIntent)
             }
         }
 
@@ -2830,7 +2854,7 @@ class HomeFragment : Fragment() {
             val promptIntent = Intent(ctx, AapService::class.java).apply {
                 action = AapService.ACTION_NATIVE_AA_PROMPT_SHOWN
             }
-            ContextCompat.startForegroundService(ctx, promptIntent)
+            ServiceStarts.start(ctx, promptIntent)
             if (autoCountdown && autoTargetMac != null) {
                 driverCountdownTimer?.start()
             }
@@ -2863,7 +2887,7 @@ class HomeFragment : Fragment() {
             putExtra(AapService.EXTRA_MAC, mac)
             putExtra(AapService.EXTRA_EXPLICIT_PICK, explicit)
         }
-        ContextCompat.startForegroundService(requireContext(), intent)
+        ServiceStarts.start(requireContext(), intent)
     }
 
     /** Manufacturer-paired phones must go to the HCT carrier, never Android RFCOMM. */
@@ -2889,7 +2913,7 @@ class HomeFragment : Fragment() {
                 // An unavailable inventory must not strand a carrier whose OEM binding died.
                 // No MAC means re-arm observation only: HCT requires an explicit paired-phone
                 // selection before it may send a manufacturer reconnect command.
-                ContextCompat.startForegroundService(context,
+                ServiceStarts.start(context,
                     Intent(context, AapService::class.java).setAction(AapService.ACTION_NATIVE_AA_POKE))
                 // This notice is not a selection prompt and must not hold/cancel fresh handoffs.
                 MaterialAlertDialogBuilder(context, R.style.DarkAlertDialog)
@@ -2905,7 +2929,7 @@ class HomeFragment : Fragment() {
             }
             var selectionResolved = false
             fun notifySelection(action: String) {
-                ContextCompat.startForegroundService(context,
+                ServiceStarts.start(context,
                     Intent(context, AapService::class.java).setAction(action))
             }
             fun cancelSelection() {
@@ -2938,7 +2962,7 @@ class HomeFragment : Fragment() {
 
     private fun showNearbyDeviceSelector() {
         // Ensure NearbyManager discovery is running via AapService
-        ContextCompat.startForegroundService(requireContext(),
+        ServiceStarts.start(requireContext(),
             Intent(requireContext(), AapService::class.java).apply {
                 action = AapService.ACTION_START_WIRELESS_SCAN
             })
@@ -3016,7 +3040,7 @@ class HomeFragment : Fragment() {
                     action = AapService.ACTION_NEARBY_CONNECT
                     putExtra(AapService.EXTRA_ENDPOINT_ID, endpoint.id)
                 }
-                ContextCompat.startForegroundService(requireContext(), intent)
+                ServiceStarts.start(requireContext(), intent)
             }
         }
 

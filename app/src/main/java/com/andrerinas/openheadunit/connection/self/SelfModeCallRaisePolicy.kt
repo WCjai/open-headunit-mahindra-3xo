@@ -61,6 +61,18 @@ object SelfModeCallRaisePolicy {
     /** Tick spacing once the attempts are spent and the only thing left to notice is the call ending. */
     const val IDLE_TICK_MS = 2_000L
 
+    /**
+     * How quickly to act. Self Mode waits for Android's own call screen to settle. A TopWay unit's
+     * phone screen is up about 100ms after the wheel's call button (measured from the unit's own
+     * log), so its cover is answered sooner and checked more often.
+     */
+    data class Timing(val firstAttemptDelayMs: Long, val retryIntervalMs: Long, val tickMs: Long) {
+        companion object {
+            val SELF_MODE = Timing(FIRST_ATTEMPT_DELAY_MS, RETRY_INTERVAL_MS, TICK_MS)
+            val TOPWAY = Timing(firstAttemptDelayMs = 200L, retryIntervalMs = 700L, tickMs = 100L)
+        }
+    }
+
     enum class Action {
         /** Nothing to do yet. Keep ticking. */
         WAIT,
@@ -80,8 +92,11 @@ object SelfModeCallRaisePolicy {
         /** Home or Recents. Someone who chose to leave is not argued with. */
         USER_LEFT("the user left deliberately"),
 
-        /** Anywhere else the call screen lands on the phone and the projection on the head unit. */
-        NOT_SELF_MODE("not Self Mode"),
+        /**
+         * Anywhere else the call screen lands on the phone and the projection on the head unit,
+         * except on a TopWay unit, whose own Bluetooth app puts its call screen over the projection.
+         */
+        NOT_SELF_MODE("not Self Mode or a TopWay unit"),
 
         PIP("picture-in-picture owns the screen"),
 
@@ -104,10 +119,16 @@ object SelfModeCallRaisePolicy {
         pipActive: Boolean,
         enabled: Boolean,
         episodeOpen: Boolean,
+        /**
+         * A TopWay unit: its Bluetooth app (`com.tw.bt`) opens its own call screen over the
+         * projection when a call rings or the wheel's answer button is pressed. The call itself runs
+         * on the car's Bluetooth module, so putting Android Auto back on top loses nothing.
+         */
+        topwayCallScreen: Boolean = false,
     ): CoverVerdict = when {
         episodeOpen -> CoverVerdict.ALREADY_OPEN
         userLeft -> CoverVerdict.USER_LEFT
-        !selfMode -> CoverVerdict.NOT_SELF_MODE
+        !selfMode && !topwayCallScreen -> CoverVerdict.NOT_SELF_MODE
         pipActive -> CoverVerdict.PIP
         !enabled -> CoverVerdict.DISABLED
         else -> CoverVerdict.OPEN
@@ -151,15 +172,16 @@ object SelfModeCallRaisePolicy {
         callActive: Boolean,
         isForeground: Boolean,
         pipActive: Boolean,
+        timing: Timing = Timing.SELF_MODE,
     ): Action {
         if (isForeground || pipActive) return Action.DONE
 
         if (callActive) {
             if (episode.attempts >= MAX_ATTEMPTS_PER_CALL) return Action.WAIT
             val dueAtMs = if (episode.attempts == 0) {
-                episode.startedAtMs + FIRST_ATTEMPT_DELAY_MS
+                episode.startedAtMs + timing.firstAttemptDelayMs
             } else {
-                episode.lastAttemptAtMs + RETRY_INTERVAL_MS
+                episode.lastAttemptAtMs + timing.retryIntervalMs
             }
             return if (nowMs >= dueAtMs) Action.RAISE else Action.WAIT
         }
@@ -189,8 +211,8 @@ object SelfModeCallRaisePolicy {
         if (lastAttemptAtMs > 0L && nowMs - lastAttemptAtMs <= ATTEMPT_CARRY_WINDOW_MS) previousAttempts else 0
 
     /** How long until the next tick. */
-    fun nextTickDelayMs(episode: Episode): Long =
-        if (episode.attempts >= MAX_ATTEMPTS_PER_CALL && episode.callEndedAtMs == 0L) IDLE_TICK_MS else TICK_MS
+    fun nextTickDelayMs(episode: Episode, timing: Timing = Timing.SELF_MODE): Long =
+        if (episode.attempts >= MAX_ATTEMPTS_PER_CALL && episode.callEndedAtMs == 0L) IDLE_TICK_MS else timing.tickMs
 
     /** Why a decision came out the way it did, for the log. */
     fun describe(action: Action, episode: Episode, callActive: Boolean, isForeground: Boolean): String =

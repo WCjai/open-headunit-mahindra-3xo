@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Radio, after the reference dashboard's outline icon. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="1.5" android:strokeLineCap="round"
+        android:strokeLineJoin="round" android:fillColor="#00000000" android:pathData="M4,8h16a2,2 0 0 1 2,2v8a2,2 0 0 1 -2,2H4a2,2 0 0 1 -2,-2v-8a2,2 0 0 1 2,-2z" />
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="1.5" android:strokeLineCap="round"
+        android:strokeLineJoin="round" android:fillColor="#00000000" android:pathData="M2,13h20" />
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="1.5" android:strokeLineCap="round"
+        android:strokeLineJoin="round" android:fillColor="#00000000" android:pathData="M12,8L18,2" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M5,17a2,2 0 1,0 4,0a2,2 0 1,0 -4,0z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M16,17a1,1 0 1,0 2,0a1,1 0 1,0 -2,0z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M13,17a1,1 0 1,0 2,0a1,1 0 1,0 -2,0z" />
+</vector>
