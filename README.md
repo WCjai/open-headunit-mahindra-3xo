@@ -5,6 +5,9 @@ TopWay Android head unit fitted in a Mahindra XUV 3XO. It turns the head unit in
 Auto receiver and replaces the stock launcher with a car home screen that works with the unit's
 own Bluetooth, FM radio and steering-wheel buttons.
 
+> **Built and tested on a Mahindra XUV 3XO MX2.** Other variants and other cars with the same
+> TopWay head unit may work, but have not been tested.
+
 <p align="center">
   <img src="docs/images/home.png" alt="Car home screen" width="800">
 </p>
@@ -62,12 +65,12 @@ own Bluetooth, FM radio and steering-wheel buttons.
 
 | | Tested unit |
 |---|---|
-| Car | Mahindra XUV 3XO (right-hand drive) |
+| Car | Mahindra XUV 3XO **MX2** (right-hand drive) |
 | Head unit | TopWay "QUAD-CORE T3 p1" (Allwinner sun8iw11 / T3) |
 | Android | 10 |
 | Screen | 1280 × 480 |
 
-Other TopWay units running Android 10 will probably work, but only this one has been tested.
+This APK was built and tested on that car only. Other TopWay units running Android 10 will probably work, but have not been tested.
 Units from other makers (FYT, MTCD and so on) can install it, but the TopWay features (Bluetooth
 bridge, radio, steering wheel) will not work on them.
 
