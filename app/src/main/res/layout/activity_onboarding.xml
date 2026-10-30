@@ -941,7 +941,127 @@
             </LinearLayout>
         </ScrollView>
 
-        <!-- Step 12: Permissions -->
+        <!-- Step 12: Car integration (TopWay Bluetooth, caller names, wheel buttons, call screen) -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingBottom="24dp"
+            android:clipToPadding="false">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/onb_car_title"
+                    android:textAppearance="?attr/textAppearanceHeadline5"
+                    android:textStyle="bold" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/onb_car_help"
+                    android:textAppearance="?attr/textAppearanceBody2" />
+
+                <!-- 1. Phone on the car's Bluetooth -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/onb_car_phone_title"
+                    android:textAppearance="?attr/textAppearanceSubtitle1"
+                    android:textStyle="bold" />
+                <TextView
+                    android:id="@+id/onb_car_phone_status"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textAppearance="?attr/textAppearanceBody2" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/onb_car_phone_button"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="@string/onb_car_open_bluetooth" />
+
+                <!-- 2. Caller names: the phonebook download -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/onb_car_contacts_title"
+                    android:textAppearance="?attr/textAppearanceSubtitle1"
+                    android:textStyle="bold" />
+                <TextView
+                    android:id="@+id/onb_car_contacts_status"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textAppearance="?attr/textAppearanceBody2" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/onb_car_contacts_button"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="@string/onb_car_open_phonebook" />
+
+                <!-- 3. Steering-wheel buttons -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/topway_wheel_title"
+                    android:textAppearance="?attr/textAppearanceSubtitle1"
+                    android:textStyle="bold" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/onb_car_wheel_desc"
+                    android:textAppearance="?attr/textAppearanceBody2" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/onb_car_wheel_button"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="@string/onb_car_learn_wheel" />
+
+                <!-- 4. Call screen over Android Auto: Display over other apps -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/topway_overlay_row"
+                    android:textAppearance="?attr/textAppearanceSubtitle1"
+                    android:textStyle="bold" />
+                <TextView
+                    android:id="@+id/onb_car_overlay_status"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textAppearance="?attr/textAppearanceBody2" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/onb_car_overlay_button"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="@string/onb_car_allow" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/onb_change_later"
+                    android:textAppearance="?attr/textAppearanceCaption" />
+            </LinearLayout>
+        </ScrollView>
+
+        <!-- Step 13: Permissions -->
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -978,7 +1098,7 @@
             </LinearLayout>
         </ScrollView>
 
-        <!-- Step 13: Ready -->
+        <!-- Step 14: Ready -->
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -1102,7 +1222,7 @@
                             <ImageView
                                 android:layout_width="24dp"
                                 android:layout_height="24dp"
-                                android:contentDescription="@string/keymap"
+                                android:contentDescription="@string/topway_wheel_title"
                                 app:srcCompat="@drawable/ic_keyboard"
                                 app:tint="?attr/colorOnSurfaceVariant" />
                             <LinearLayout
@@ -1117,14 +1237,14 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="@string/keymap"
+                                    android:text="@string/topway_wheel_title"
                                     android:textAppearance="?attr/textAppearanceBodyLarge"
                                     android:textColor="?attr/colorOnSurface" />
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_marginTop="2dp"
-                                    android:text="@string/keymap_description"
+                                    android:text="@string/car_wheel_setting_desc"
                                     android:textAppearance="?attr/textAppearanceBodySmall"
                                     android:textColor="?attr/colorOnSurfaceVariant" />
                             </LinearLayout>

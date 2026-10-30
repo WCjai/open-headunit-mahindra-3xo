@@ -1630,7 +1630,7 @@
     <string name="topway_wheel_impedance_high">High</string>
     <string name="topway_wheel_clear">Forget all learned buttons</string>
     <string name="topway_wheel_clear_confirm">Forget every learned steering-wheel button? They stop working everywhere until you learn them again.</string>
-    <string name="topway_wheel_help">1. Tap Start learning. 2. Tap a function on the right. 3. Press and hold that button on the steering wheel until it shows Learned. 4. Repeat for each button, then tap End learning and save. Learned buttons work in Android Auto straight away; Keymap can change what they do.</string>
+    <string name="topway_wheel_help">1. Tap Start learning. 2. Tap a function on the right. 3. Press and hold that button on the steering wheel until it shows Learned. 4. Repeat for each button, then tap End learning and save. Learned buttons work in Android Auto straight away.</string>
     <string name="topway_wheel_status_idle">Not learning. Tap Start learning to begin.</string>
     <string name="topway_wheel_status_learning">Learning. Tap a function, then press its steering-wheel button.</string>
     <string name="topway_wheel_status_waiting">Now press and hold the steering-wheel button for %1$s…</string>
@@ -1651,4 +1651,25 @@
     <string name="topway_overlay_allowed">Allowed</string>
     <string name="topway_overlay_not_allowed">Not allowed. Tap to allow it, so Android Auto can come back over the car\'s call screen.</string>
     <string name="topway_overlay_needed">Allow \"Display over other apps\" for Open Headunit (Settings, Apps, Special access) so it can come back over the car\'s call screen.</string>
+
+    <!-- Car build: settings clean-up -->
+    <string name="car_wheel_setting_desc">Teach the car\'s steering-wheel buttons to the head unit, for Android Auto and the car\'s own apps</string>
+    <string name="developer_settings_shown">Developer settings are now shown</string>
+    <string name="developer_settings_hidden">Developer settings are hidden again</string>
+
+    <!-- Car build: setup wizard car step -->
+    <string name="onb_car_title">Connect the car</string>
+    <string name="onb_car_help">A few things in the head unit\'s own apps that make calls, caller names and the steering wheel work with Android Auto. Each one can also be done later.</string>
+    <string name="onb_car_phone_title">Phone on the car\'s Bluetooth</string>
+    <string name="onb_car_phone_steps">Not connected. On your phone, open Bluetooth and pair with the car (the name and PIN are shown in the car\'s Bluetooth app). Calls and music go through it.</string>
+    <string name="onb_car_phone_connected">Connected. Calls and Bluetooth music are ready.</string>
+    <string name="onb_car_open_bluetooth">Open car Bluetooth</string>
+    <string name="onb_car_contacts_title">Caller names</string>
+    <string name="onb_car_contacts_steps">No phonebook yet, so calls show only the number. In the car\'s Bluetooth app open Phonebook and tap Download, then allow contact access on your phone.</string>
+    <string name="onb_car_contacts_done">Phonebook saved (%1$d numbers). Callers are shown by name.</string>
+    <string name="onb_car_open_phonebook">Open phonebook</string>
+    <string name="onb_car_wheel_desc">Teach the head unit each steering-wheel button once: volume, next and previous track, and call buttons. They then work in Android Auto too.</string>
+    <string name="onb_car_learn_wheel">Learn buttons</string>
+    <string name="onb_car_overlay_why">Needed so Android Auto comes back on screen after the car\'s call screen closes.</string>
+    <string name="onb_car_allow">Allow</string>
 </resources>

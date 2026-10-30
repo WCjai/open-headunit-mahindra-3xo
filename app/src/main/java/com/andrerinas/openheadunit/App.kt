@@ -48,6 +48,12 @@ class App : Application(), Application.ActivityLifecycleCallbacks {
         registerActivityLifecycleCallbacks(this)
         com.andrerinas.openheadunit.connection.carkey.topway.TwProbe.register(this)
         com.andrerinas.openheadunit.connection.carkey.topway.TopwayContacts.register(this)
+        // The car's defaults (auto-connect on USB, right-hand drive, no toasts, car launcher), once.
+        try {
+            com.andrerinas.openheadunit.utils.Settings(this).applyCarProfileOnce(this)
+        } catch (e: Exception) {
+            AppLog.w("App", "Could not apply the car defaults", e)
+        }
 
         try {
             val packageReceiver = object : BroadcastReceiver() {

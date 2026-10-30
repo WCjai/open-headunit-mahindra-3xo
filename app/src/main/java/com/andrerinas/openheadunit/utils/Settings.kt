@@ -137,7 +137,7 @@ class Settings(private val context: Context) {
     // Off by default: on it, MainActivity.checkOverlayPermission() sends a fresh install to the
     // system overlay screen on first resume, for a feature the user has not asked for yet.
     var enableFloatingButton: Boolean
-        get() = prefs.getBoolean("enable-floating-button", false)
+        get() = false // Not offered in the car build: the car home and the Home button replace it.
         set(value) { prefs.edit().putBoolean("enable-floating-button", value).apply() }
 
     var floatingButtonConnectionStatusMode: Boolean
@@ -202,7 +202,7 @@ class Settings(private val context: Context) {
 
     // HUD Mode (Horizontal flip for windshield reflection)
     var hudMirroring: Boolean
-        get() = prefs.getBoolean("hud_mirroring", false)
+        get() = false // Not offered in the car build (no HUD).
         set(value) { prefs.edit().putBoolean("hud_mirroring", value).apply() }
 
     // UI Scale percentage for Home
@@ -1159,13 +1159,11 @@ class Settings(private val context: Context) {
      * single-choice [primaryConnection].
      */
     var connectionModes: Set<ConnectionMode>
-        get() {
-            val stored = prefs.getStringSet("connection-modes", null)
-            if (stored != null) return stored.mapNotNull { ConnectionMode.fromKey(it) }.toSet()
-            val migrated = migrateLegacyConnectionModes()
-            connectionModes = migrated
-            return migrated
-        }
+        // This car build is USB only: the unit's Bluetooth is a separate module Android cannot
+        // reach, so wireless Android Auto cannot start on its own here (a wireless adapter on USB
+        // still works, since it looks like a phone). Locking the set hides every wireless and Self
+        // Mode setting and keeps the service from bringing wireless up in the background.
+        get() = setOf(ConnectionMode.USB)
         set(value) {
             prefs.edit().putStringSet("connection-modes", value.map { it.key }.toSet()).apply()
         }
@@ -1635,9 +1633,34 @@ class Settings(private val context: Context) {
      * The bento home: a fixed grid of music, Android Auto, Settings, Bluetooth, Radio and More apps
      * instead of the paged home with favorites and widgets. On by default.
      */
+    /** Always the car home in this build; the old paged home is no longer offered. */
     var homeLayoutBento: Boolean
-        get() = prefs.getBoolean("home-layout-bento", true)
+        get() = true
         set(value) { prefs.edit().putBoolean("home-layout-bento", value).apply() }
+
+    /** Debug and advanced video/audio settings, shown after tapping Version seven times. */
+    var developerOptionsUnlocked: Boolean
+        get() = prefs.getBoolean("developer-options-unlocked", false)
+        set(value) { prefs.edit().putBoolean("developer-options-unlocked", value).apply() }
+
+    /**
+     * The car's defaults, applied once per profile version on install or update. Later changes
+     * by the user are kept: this only runs again if [CAR_PROFILE_VERSION] goes up.
+     */
+    fun applyCarProfileOnce(context: Context) {
+        if (prefs.getInt(KEY_CAR_PROFILE_VERSION, 0) >= CAR_PROFILE_VERSION) return
+        // Android Auto starts by itself when the phone is plugged in, or already plugged in at boot.
+        autoStartOnUsb = true
+        syncAutoStartOnUsbToDeviceStorage(context, true)
+        // Driver on the right (India): the Android Auto rail and the Home button follow it.
+        rightHandDrive = true
+        // No pop-up messages over the car screen.
+        showToastMessages = false
+        // This app is the unit's home screen.
+        enableCarLauncher = true
+        CarLauncherManager.setLauncherEnabled(context, true)
+        prefs.edit().putInt(KEY_CAR_PROFILE_VERSION, CAR_PROFILE_VERSION).apply()
+    }
 
     /** Date and time on the home screen. Off by default: the driver asks for them. */
     var showHomeClock: Boolean
@@ -1890,6 +1913,9 @@ class Settings(private val context: Context) {
         const val KEY_ASSISTANT_VOLUME_OFFSET = "assistant-volume-offset"
         const val KEY_NAVIGATION_VOLUME_OFFSET = "navigation-volume-offset"
         const val KEY_ENABLE_CAR_LAUNCHER = "enable-car-launcher"
+        private const val KEY_CAR_PROFILE_VERSION = "car-profile-version"
+        /** Raise to apply changed car defaults once more on every unit. */
+        private const val CAR_PROFILE_VERSION = 1
         const val KEY_WIFI_DIRECT_BANDED_REFUSED_ON = "wifi-direct-banded-refused-on"
 
         const val AUTO_CONNECT_LAST_SESSION = "last-session"
@@ -2354,7 +2380,7 @@ class Settings(private val context: Context) {
         }
 
     var enableRotary: Boolean
-        get() = prefs.getBoolean("enable-rotary", false)
+        get() = false // Not offered in the car build (no rotary controller).
         set(value) { prefs.edit().putBoolean("enable-rotary", value).apply() }
 
     var killOnDisconnect: Boolean

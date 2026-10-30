@@ -31,6 +31,7 @@ import com.andrerinas.openheadunit.decoder.video.preflight.VideoPreflightRecomme
 import com.andrerinas.openheadunit.decoder.video.preflight.VideoPreflightRun
 import com.andrerinas.openheadunit.decoder.video.preflight.VideoPreflightRunner
 import com.andrerinas.openheadunit.utils.AppLog
+import com.andrerinas.openheadunit.utils.ToastUtils
 import com.andrerinas.openheadunit.utils.AppPermissions
 import com.andrerinas.openheadunit.utils.AppThemeManager
 import com.andrerinas.openheadunit.utils.CarLauncherManager
@@ -151,12 +152,20 @@ class OnboardingActivity : BaseActivity() {
 
         // Ready step: optional-extras card. Each row finishes the wizard and jumps straight into
         // that Settings sub-screen (things the wizard does not already walk you through).
-        findViewById<View>(R.id.onb_extra_loading).setOnClickListener {
-            finishOnboardingInto(R.id.loadingScreenFragment)
+        // The loading screen is a developer setting in the car build; hide its row and divider.
+        findViewById<View>(R.id.onb_extra_loading).let { row ->
+            row.visibility = View.GONE
+            (row.parent as? android.view.ViewGroup)?.let { parent ->
+                parent.getChildAt(parent.indexOfChild(row) + 1)?.visibility = View.GONE
+            }
         }
+        // Steering-wheel learning in place of the gamepad keymap.
         findViewById<View>(R.id.onb_extra_keymap).setOnClickListener {
-            finishOnboardingInto(R.id.keymapFragment)
+            completeOnboarding()
+            startActivity(Intent(this, TopwayWheelActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            finish()
         }
+        bindCarStep()
         findViewById<View>(R.id.onb_extra_mic).setOnClickListener {
             finishOnboardingInto(R.id.micSettingsFragment)
         }
@@ -213,6 +222,7 @@ class OnboardingActivity : BaseActivity() {
         permissionBinder?.rebind()
         if (step == STEP_DPI) dpiPicker?.startDemo()
         if (step == STEP_VIDEO) showVideoStep()
+        if (step == STEP_CAR) updateCarStep()
     }
 
     override fun onPause() {
@@ -229,6 +239,7 @@ class OnboardingActivity : BaseActivity() {
     }
 
     override fun onDestroy() {
+        App.provide(this).topwayCallBridge.removeStateListener(carStateListener)
         videoJob?.cancel()
         videoJob = null
         audioStep?.release()
@@ -241,7 +252,86 @@ class OnboardingActivity : BaseActivity() {
      * separate phone, so it is hidden there.
      */
     private fun isStepHidden(s: Int): Boolean =
-        s == STEP_GPS && !settings.showsExternalGps()
+        (s == STEP_GPS && !settings.showsExternalGps()) ||
+            // The car build is USB only, so there is no connection type to choose.
+            s == STEP_CONNECTION ||
+            (s == STEP_CAR && !isTopwayUnit)
+
+    /** A TopWay head unit: its Bluetooth app or its MCU channel is there to integrate with. */
+    private val isTopwayUnit: Boolean by lazy {
+        App.provide(this).topwayCallBridge.isAvailable ||
+            com.andrerinas.openheadunit.connection.carkey.topway.TwUtilChannel.available
+    }
+
+    // --- Car integration (TopWay) ---
+
+    private fun bindCarStep() {
+        findViewById<MaterialButton>(R.id.onb_car_phone_button).setOnClickListener { openTopwayBluetooth() }
+        findViewById<MaterialButton>(R.id.onb_car_contacts_button).setOnClickListener { openTopwayBluetooth() }
+        findViewById<MaterialButton>(R.id.onb_car_wheel_button).setOnClickListener {
+            startActivity(Intent(this, TopwayWheelActivity::class.java))
+        }
+        findViewById<MaterialButton>(R.id.onb_car_overlay_button).setOnClickListener { openOverlaySettings() }
+        if (isTopwayUnit) App.provide(this).topwayCallBridge.addStateListener(carStateListener)
+    }
+
+    /** The phone's link answer arrives a moment after the query, so the row follows it live. */
+    private val carStateListener: () -> Unit = { runOnUiThread { if (step == STEP_CAR) updateCarStep() } }
+
+    /** Live status for each row, re-read whenever the wizard comes back from the TopWay app. */
+    private fun updateCarStep() {
+        if (!isTopwayUnit) return
+        val bridge = App.provide(this).topwayCallBridge
+        if (bridge.isAvailable) bridge.queryLink()
+        findViewById<TextView>(R.id.onb_car_phone_status).text = getString(
+            if (bridge.moduleConnected) R.string.onb_car_phone_connected else R.string.onb_car_phone_steps
+        )
+        val contacts = com.andrerinas.openheadunit.connection.carkey.topway.TopwayContacts.size
+        findViewById<TextView>(R.id.onb_car_contacts_status).text =
+            if (contacts > 0) getString(R.string.onb_car_contacts_done, contacts)
+            else getString(R.string.onb_car_contacts_steps)
+        val overlay = AppPermissions.isOverlayGranted(this)
+        findViewById<TextView>(R.id.onb_car_overlay_status).text =
+            getString(if (overlay) R.string.topway_overlay_allowed else R.string.onb_car_overlay_why)
+        findViewById<MaterialButton>(R.id.onb_car_overlay_button).visibility =
+            if (overlay) View.GONE else View.VISIBLE
+    }
+
+    /** TopWay's own Bluetooth app: pairing and the phonebook download live there. */
+    private fun openTopwayBluetooth() {
+        val pkg = com.andrerinas.openheadunit.connection.carkey.topway.TopwayBluetooth.PACKAGE
+        val attempts = listOfNotNull(
+            Intent().setComponent(android.content.ComponentName(pkg, "$pkg.ATBluetoothActivity")),
+            packageManager.getLaunchIntentForPackage(pkg),
+        )
+        for (intent in attempts) {
+            try {
+                startActivity(intent)
+                return
+            } catch (e: Exception) {
+                AppLog.w("OnboardingActivity: could not open the TopWay Bluetooth app: ${e.message}")
+            }
+        }
+        ToastUtils.showToast(this, getString(R.string.bento_app_missing, getString(R.string.tv_menu_bluetooth)),
+            android.widget.Toast.LENGTH_SHORT, force = true)
+    }
+
+    private fun openOverlaySettings() {
+        val pkg = android.net.Uri.parse("package:$packageName")
+        val attempts = listOf(
+            Intent(android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION, pkg),
+            Intent(android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION),
+            Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS, pkg),
+        )
+        for (intent in attempts) {
+            try {
+                startActivity(intent)
+                return
+            } catch (_: Exception) {
+            }
+        }
+        ToastUtils.showToast(this, R.string.topway_overlay_needed, android.widget.Toast.LENGTH_LONG, force = true)
+    }
 
     /** The steps actually shown, in order, after removing the ones that do not apply. */
     private fun visibleSteps(): List<Int> = (0 until STEP_COUNT).filter { !isStepHidden(it) }
@@ -589,6 +679,7 @@ class OnboardingActivity : BaseActivity() {
         if (step == STEP_AUTOMATION) applyAutomationVisibility()
         if (step == STEP_LAUNCHER) updateLauncherStep()
         if (step == STEP_PERMISSIONS) permissionBinder?.rebind()
+        if (step == STEP_CAR) updateCarStep()
         if (step == STEP_VEHICLE) applyVehicleTypeNote()
         if (step == STEP_VIDEO) showVideoStep() else stopVideoTest()
         if (step == STEP_DPI) {
@@ -1330,7 +1421,7 @@ class OnboardingActivity : BaseActivity() {
         var deferredThisSession = false
         private const val KEY_STEP = "onb_step"
         private const val KEY_LAUNCHER_PENDING = "onb_launcher_pending"
-        private const val STEP_COUNT = 14
+        private const val STEP_COUNT = 15
         /** Below this available height (dp) the footer goes to a single row. 800x480 lands
          * well under it; 1024x600 stays above, so its footer is unchanged. */
         private const val SHORT_SCREEN_MAX_HEIGHT_DP = 500
@@ -1346,8 +1437,9 @@ class OnboardingActivity : BaseActivity() {
         private const val STEP_LAUNCHER = 9
         private const val STEP_GPS = 10
         private const val STEP_VEHICLE = 11
-        private const val STEP_PERMISSIONS = 12
-        private const val STEP_READY = 13
+        private const val STEP_CAR = 12
+        private const val STEP_PERMISSIONS = 13
+        private const val STEP_READY = 14
 
         // The manufacturer half of the Desktop Head Unit identity we report by default.
         private const val DHU_MAKE = "Google"

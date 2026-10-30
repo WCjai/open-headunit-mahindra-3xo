@@ -157,7 +157,7 @@ class SettingsFragment : Fragment() {
         // Video
         "videoCodec", "fpsLimit",
         // Input
-        "keymap",
+        "steeringWheel", "keymap",
         // Audio
         "enableAudioSink", "audioStreamSettings", "useAAudioOutput", "micSettings", "audioVolumeOffsets",
         // Info
@@ -2251,6 +2251,16 @@ class SettingsFragment : Fragment() {
         // --- Input Settings ---
         items.add(SettingItem.CategoryHeader("input", R.string.category_input))
 
+        // The car's steering-wheel buttons are learned in the TopWay MCU, not mapped like a gamepad.
+        items.add(SettingItem.SettingEntry(
+            stableId = "steeringWheel",
+            nameResId = R.string.topway_wheel_title,
+            value = getString(R.string.car_wheel_setting_desc),
+            onClick = { _ ->
+                startActivity(Intent(requireContext(), TopwayWheelActivity::class.java))
+            }
+        ))
+
         items.add(SettingItem.SettingEntry(
             stableId = "keymap",
             nameResId = R.string.keymap,
@@ -2963,7 +2973,7 @@ class SettingsFragment : Fragment() {
             stableId = "version",
             nameResId = R.string.version,
             value = BuildConfig.VERSION_NAME,
-            onClick = { /* Read only */ }
+            onClick = { onVersionTapped() }
         ))
 
         items.add(SettingItem.SettingEntry(
@@ -3125,6 +3135,11 @@ class SettingsFragment : Fragment() {
         // Self Mode hides both, All/unset show everything.
         if (isHiddenByConnection(item, categoryId)) return false
 
+        // Not offered in the car build at all, and developer settings until Version is tapped.
+        if (item.stableId in carRemovedIds) return false
+        if (!settings.developerOptionsUnlocked &&
+            (item.stableId in developerOnlyIds || categoryId in developerOnlyCategories)) return false
+
         if (item.stableId == "deviceSpecificSettings" && !settings.isAdvancedSettingsActive) return false
 
         if (query.isNotEmpty()) {
@@ -3138,6 +3153,54 @@ class SettingsFragment : Fragment() {
 
     // Items scoped to a USB connection (the Wireless Connection category is the WiFi scope).
     private val usbScopedIds = setOf("useLibusb")
+
+    /**
+     * Rows the car build does not offer: it is USB only, always uses the car home, has no rotary
+     * controller or HUD, and is not updated from the original project's releases.
+     */
+    private val carRemovedIds = setOf(
+        "connectionMode",
+        "customization",
+        "enableFloatingButton", "floatingButtonConnectionStatusMode", "floatingButtonSizeDp",
+        "floatingButtonOpacityPercent", "floatingButtonDisconnectedOpacityPercent",
+        "floatingButtonXPercent", "floatingButtonYPercent",
+        "enableRotary",
+        "hudMirroring",
+        "check_for_updates", "support",
+    )
+
+    /** Shown only once developer settings are unlocked by tapping Version seven times. */
+    private val developerOnlyCategories = setOf("debug", "video")
+    private val developerOnlyIds = setOf(
+        "useLibusb", "deviceSpecificSettings", "oemAppManagement", "allowExternalConfiguration",
+        "fakeSpeed",
+        "pixelAspectRatioE4", "startInFullscreenMode", "viewMode", "screenOrientation",
+        "videoFitMode", "forcedScale",
+        "loadingScreen",
+        "keymap",
+        "enableAudioSink", "staticAudioFocus", "playbackFocusModeStaticHint", "useAAudioOutput",
+        "useAacAudio", "attachHwDspEqualizer", "syncMediaSessionAaMetadata",
+        "audioLatencyMultiplier", "audioQueueCapacity",
+    )
+
+    // Counts Version taps while this screen is open; a fresh visit starts again from zero.
+    private var versionTaps = 0
+
+    /** Seven taps on Version show or hide the developer settings, like Android's own. */
+    private fun onVersionTapped() {
+        versionTaps++
+        if (versionTaps < 7) return
+        versionTaps = 0
+        val unlocked = !settings.developerOptionsUnlocked
+        settings.developerOptionsUnlocked = unlocked
+        ToastUtils.showToast(
+            requireContext(),
+            getString(if (unlocked) R.string.developer_settings_shown else R.string.developer_settings_hidden),
+            Toast.LENGTH_SHORT,
+            force = true
+        )
+        updateSettingsList()
+    }
 
     // Resolutions this wide or more (1440p, 4K) are flagged as high-bandwidth.
     private val HIGH_BANDWIDTH_WIDTH = 2560
@@ -4059,6 +4122,7 @@ class SettingsFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        versionTaps = 0
         // Refresh settings list when returning from sub-screens (e.g. AutoConnectFragment, DarkModeFragment)
         if (::settingsAdapter.isInitialized) {
             settings = App.provide(requireContext()).settings
