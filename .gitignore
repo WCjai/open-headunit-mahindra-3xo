@@ -82,3 +82,7 @@ deploy_old_tablet.sh
 .antigravitycli
 .agents
 dev-note8.ps1
+
+# Release signing (never commit)
+key.properties
+*.keystore
