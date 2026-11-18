@@ -16,6 +16,7 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.andrerinas.openheadunit.R
+import com.andrerinas.openheadunit.main.theme.UiTheme
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.AppThemeManager
 import com.andrerinas.openheadunit.utils.LocaleHelper
@@ -39,6 +40,7 @@ open class BaseActivity : AppCompatActivity() {
     private var currentUseExtremeDarkMode: Boolean = false
     private var currentHudMirroring: Boolean = false
     private var currentHomeBackgroundImagePath: String? = null
+    private var currentUiTheme: UiTheme? = null
 
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(LocaleHelper.wrapContext(newBase))
@@ -46,6 +48,8 @@ open class BaseActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // The head-unit look (Synthwave or Glass), before any layout is inflated.
+        currentUiTheme = UiTheme.applyTo(this)
         val settings = Settings(this)
         currentLanguage = settings.appLanguage
         currentAppTheme = settings.appTheme
@@ -100,7 +104,8 @@ open class BaseActivity : AppCompatActivity() {
             currentUseGradientBackground != settings.useGradientBackground ||
             currentUseExtremeDarkMode != settings.useExtremeDarkMode ||
             currentHudMirroring != settings.hudMirroring ||
-            currentHomeBackgroundImagePath != settings.homeBackgroundImagePath) {
+            currentHomeBackgroundImagePath != settings.homeBackgroundImagePath ||
+            currentUiTheme != UiTheme.current(this)) {
             recreate()
         } else {
             applyHudMirroring()

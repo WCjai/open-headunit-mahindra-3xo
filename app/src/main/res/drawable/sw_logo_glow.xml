@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A soft cyan glow behind the Android Auto and CarPlay logos (the mock's neon drop-shadow) -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval">
+    <gradient
+        android:type="radial"
+        android:gradientRadius="50%p"
+        android:startColor="#552DE2E6"
+        android:centerColor="#1A2DE2E6"
+        android:endColor="#002DE2E6" />
+</shape>

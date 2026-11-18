@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The car's Sound screen (SoundActivity) -->
+<resources>
+    <string name="sound_title">Sound</string>
+    <string name="sound_equalizer">Equalizer</string>
+    <string name="sound_zone">Zone</string>
+    <string name="sound_reset">Reset</string>
+    <string name="sound_centre">Centre</string>
+    <string name="sound_bass">Bass</string>
+    <string name="sound_middle">Middle</string>
+    <string name="sound_treble">Treble</string>
+    <string name="sound_balance">Balance</string>
+    <string name="sound_fader">Fader</string>
+    <string name="sound_subwoofer">Subwoofer</string>
+    <string name="sound_loudness">Loudness</string>
+    <string name="sound_off">Off</string>
+    <string name="sound_preset_normal">Normal</string>
+    <string name="sound_preset_jazz">Jazz</string>
+    <string name="sound_preset_pop">Pop</string>
+    <string name="sound_preset_classical">Classical</string>
+    <string name="sound_preset_rock">Rock</string>
+    <string name="sound_preset_news">News</string>
+    <string name="sound_preset_urban">Urban</string>
+    <string name="sound_preset_techno">Techno</string>
+    <string name="sound_reading">Reading the car\'s sound settings…</string>
+    <string name="sound_no_answer">The car\'s sound processor did not answer. Its settings are in TopWay\'s EQ app.</string>
+    <string name="sound_other_chip">This car\'s sound processor (%1$s) is set in TopWay\'s EQ app.</string>
+    <string name="sound_open_topway">Open TopWay EQ</string>
+    <string name="sound_unavailable">The car\'s sound processor cannot be reached: %1$s</string>
+</resources>

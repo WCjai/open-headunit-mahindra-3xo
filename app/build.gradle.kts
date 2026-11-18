@@ -72,9 +72,22 @@ android {
 
     println("Building from commit: $gitDescription")
 
+    // CarPlay accessory identity, for personal builds only. It never lives in the repo: point
+    // local.properties `carplay.identity.dir` (or env CARPLAY_IDENTITY_DIR) at a folder holding
+    // offline-mfi/identity.pk8 and offline-mfi/certificate.p7b. Without it the APK still builds,
+    // and CarPlay reports that authentication is missing. See carplay/README.md.
+    val localProps = Properties().apply {
+        rootProject.file("local.properties").takeIf { it.exists() }?.let { f -> FileInputStream(f).use { load(it) } }
+    }
+    val carplayIdentityDir: File? = (System.getenv("CARPLAY_IDENTITY_DIR") ?: localProps.getProperty("carplay.identity.dir"))
+        ?.let { file(it) }
+        ?.takeIf { File(it, "offline-mfi/identity.pk8").isFile && File(it, "offline-mfi/certificate.p7b").isFile }
+    println("CarPlay identity: ${carplayIdentityDir ?: "not configured"}")
+
     sourceSets {
         getByName("main") {
             assets.srcDirs("${project.layout.buildDirectory.get().asFile}/generated/assets/root")
+            carplayIdentityDir?.let { assets.srcDir(it) }
         }
     }
 
@@ -94,10 +107,11 @@ android {
         // changed to Open Headunit. The code package and namespace stay openheadunit, so the
         // applicationId deliberately differs from the namespace, like com.google.talk for Hangouts.
         applicationId = "com.andrerinas.headunitrevived"
-        minSdk = 16
+        // 24: the CarPlay modules (DiPlay) and Compose need Android 7.0. The car runs Android 8.1.
+        minSdk = 24
         targetSdk = 36
-        versionCode = 121
-        versionName = "1.0.0-3xo"
+        versionCode = 122
+        versionName = "2.0.0-3xo"
         setProperty("archivesBaseName", "${applicationId}_${versionName}")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
@@ -119,11 +133,9 @@ android {
     productFlavors {
         create("playstore") {
             dimension = "distribution"
-            minSdk = 21
         }
         create("github") {
             dimension = "distribution"
-            // Default minSdk 16 from defaultConfig is used
         }
     }
 
@@ -273,6 +285,9 @@ dependencies {
     testImplementation("org.mockito:mockito-core:5.14.2")
 
     implementation(project(":contract"))
+
+    // Apple CarPlay (DiPlay engine + CarPlay screen), see carplay/README.md
+    implementation(project(":carplay-ui"))
 
     // Multidex
     implementation("androidx.multidex:multidex:2.0.1")

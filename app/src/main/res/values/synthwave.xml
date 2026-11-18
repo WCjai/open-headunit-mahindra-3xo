@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The synthwave look (ui/Head Unit UI Mock.html): a sunset coast behind frosted glass cards with pink
+    edges, cyan neon icons and condensed headline type. Shared by the home, Radio, More Apps and the
+    call card. Sizes are the mock's pixels; the unit is 1280x480 at density 1.
+-->
+<resources>
+    <item name="sw_idle_hidden" type="id" />
+
+    <color name="sw_cyan">#FF2DE2E6</color>
+    <color name="sw_pink">#FFFF5FA2</color>
+    <color name="sw_amber">#FFFF9A3D</color>
+    <color name="sw_text">#FFF4F1E4</color>
+    <color name="sw_date">#FFE8ECD8</color>
+    <color name="sw_soft">#FFF6DFF0</color>
+    <color name="sw_ice">#FFBDF6F7</color>
+    <color name="sw_dot">#FFE9FDFF</color>
+    <color name="sw_scale">#FFF3DCEF</color>
+    <color name="sw_scrim">#590A0414</color>
+    <color name="sw_menu">#F21A0C26</color>
+    <color name="sw_divider">#33FF8CC8</color>
+
+    <style name="SwText">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/tv_white</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:maxLines">1</item>
+    </style>
+
+    <!-- Card and screen titles: heavy condensed capitals with a hard black drop -->
+    <style name="SwText.Header">
+        <item name="android:fontFamily">?attr/uiFontDisplay</item>
+        <item name="android:textSize">19sp</item>
+        <item name="android:letterSpacing">?attr/uiTracking</item>
+        <item name="android:textAllCaps">?attr/uiCaps</item>
+        <item name="android:textColor">?attr/uiTextTitle</item>
+        <item name="android:shadowColor">?attr/uiShadow</item>
+        <item name="android:shadowDx">2</item>
+        <item name="android:shadowDy">2</item>
+        <item name="android:shadowRadius">1</item>
+    </style>
+
+    <!-- Big words (song title, CONNECT, HOME): the header face without the colour -->
+    <style name="SwText.Big">
+        <item name="android:fontFamily">?attr/uiFontDisplay</item>
+        <item name="android:letterSpacing">?attr/uiTrackingTight</item>
+        <item name="android:textAllCaps">?attr/uiCaps</item>
+        <item name="android:shadowColor">?attr/uiShadow</item>
+        <item name="android:shadowDx">1</item>
+        <item name="android:shadowDy">1</item>
+        <item name="android:shadowRadius">1</item>
+    </style>
+
+    <!-- Small labels -->
+    <style name="SwText.Label">
+        <item name="android:fontFamily">?attr/uiFontLabel</item>
+        <item name="android:letterSpacing">?attr/uiTrackingWide</item>
+        <item name="android:textColor">?attr/uiTextSoft</item>
+    </style>
+
+    <!-- Digits: the clock, frequencies, times -->
+    <style name="SwText.Clock">
+        <item name="android:fontFamily">?attr/uiFontDigits</item>
+        <item name="android:letterSpacing">?attr/uiTrackingTight</item>
+        <item name="android:shadowColor">?attr/uiShadow</item>
+        <item name="android:shadowDx">2</item>
+        <item name="android:shadowDy">2</item>
+        <item name="android:shadowRadius">1</item>
+    </style>
+
+    <style name="SwText.Chip" parent="SwText.Label">
+        <item name="android:textSize">10sp</item>
+        <item name="android:letterSpacing">?attr/uiTracking</item>
+        <item name="android:textAllCaps">?attr/uiCaps</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <!-- The small rounded tag in a card's header (BLUETOOTH, CONNECT, HOLD TO SAVE) -->
+    <style name="SwChip">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">22dp</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:background">?attr/uiChipBg</item>
+        <item name="android:paddingLeft">6dp</item>
+        <item name="android:paddingRight">6dp</item>
+    </style>
+
+    <!-- A card's header row: title on the left, an optional chip on the right -->
+    <style name="SwCardHeader">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">34dp</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
+    <!-- The glass card (the mock's .mil) -->
+    <style name="SwCard">
+        <item name="android:background">?attr/uiCardBg</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:padding">10dp</item>
+    </style>
+
+    <!-- Status badges in the top bar (Bluetooth, Wi-Fi) -->
+    <style name="SwBadge">
+        <item name="android:layout_width">44dp</item>
+        <item name="android:layout_height">44dp</item>
+        <item name="android:background">?attr/uiBadgeBg</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:scaleType">fitCenter</item>
+    </style>
+
+    <!-- Glass buttons (the mock's .cbtn) -->
+    <style name="SwButton">
+        <item name="android:background">?attr/uiBtnBg</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="SwButton.Text">
+        <item name="android:textColor">@color/tv_white</item>
+        <item name="android:fontFamily">?attr/uiFontDisplay</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:letterSpacing">?attr/uiTrackingTight</item>
+        <item name="android:textAllCaps">?attr/uiCaps</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:shadowColor">?attr/uiShadow</item>
+        <item name="android:shadowDx">1</item>
+        <item name="android:shadowDy">1</item>
+        <item name="android:shadowRadius">1</item>
+    </style>
+
+    <!-- "‹ HOME" in the top-left of Radio, More Apps and the call screen -->
+    <style name="SwHomePill">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">44dp</item>
+        <item name="android:background">?attr/uiHomePillBg</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingLeft">10dp</item>
+        <item name="android:paddingRight">16dp</item>
+        <item name="android:drawablePadding">6dp</item>
+        <item name="android:text">@string/tv_home</item>
+        <item name="android:textColor">@color/tv_white</item>
+        <item name="android:fontFamily">?attr/uiFontDisplay</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:letterSpacing">?attr/uiTrackingWide</item>
+        <item name="android:textAllCaps">?attr/uiCaps</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:shadowColor">?attr/uiShadow</item>
+        <item name="android:shadowDx">1</item>
+        <item name="android:shadowDy">1</item>
+        <item name="android:shadowRadius">1</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+
+    <string name="sw_connect_word">Connect</string>
+    <string name="sw_over_usb">over USB</string>
+    <string name="sw_connect_chip">Connect</string>
+    <string name="sw_connected_chip">● Connected</string>
+    <string name="sw_open_word">Open</string>
+    <string name="sw_open_carplay">CarPlay</string>
+    <string name="sw_playing">● Playing</string>
+    <string name="sw_paused">● Paused</string>
+    <string name="sw_more_apps">More Apps</string>
+    <string name="sw_more_apps_hint">More apps · hold for every app</string>
+    <string name="sw_tuner">Tuner</string>
+    <string name="sw_presets">Presets</string>
+    <string name="sw_hold_to_save">Hold to save</string>
+    <string name="sw_preset_label">P%1$d</string>
+    <string name="sw_band_chip">%1$s · %2$s</string>
+    <string name="sw_stereo">Stereo</string>
+    <string name="sw_on_air">On air</string>
+    <string name="sw_radio_off">Off</string>
+    <string name="bento_radio_page_prev">Previous stations</string>
+    <string name="bento_radio_page_next">Next stations</string>
+    <string name="sw_unit_band">%1$s · %2$s</string>
+    <string name="sw_call_incoming">Incoming call</string>
+    <string name="sw_call_outgoing">Calling</string>
+    <string name="sw_call_active">On a call</string>
+    <string name="sw_call_chip_incoming">● Mobile · Calling…</string>
+    <string name="sw_call_chip_outgoing">● Dialling…</string>
+    <string name="sw_call_chip_active">● In call</string>
+    <string name="sw_answer">Answer</string>
+    <string name="no_device_found">No device found</string>
+    <string name="no_iphone_found">No iPhone found · plug it in with a cable</string>
+    <string name="sw_app_bluetooth">Bluetooth</string>
+    <string name="sw_app_music">Music</string>
+    <string name="sw_app_video">Video</string>
+    <string name="sw_app_eq">EQ</string>
+    <string name="sw_app_tv">TV</string>
+    <string name="sw_app_steering">Steering</string>
+    <string name="sw_app_settings">Settings</string>
+    <string name="sw_app_radio">Radio</string>
+    <string name="sw_am_label" translatable="false">AM</string>
+    <string name="sw_fm_label" translatable="false">FM</string>
+    <string name="sw_carplay_connecting">Connecting to iPhone…</string>
+    <string name="sw_tap_to_connect">Tap to connect over USB</string>
+    <string name="sw_connected_tap">Connected · tap to open</string>
+    <string name="sw_carplay_open">Tap to open CarPlay</string>
+    <string name="sw_carplay_ready">Plug in your iPhone</string>
+    <string name="sw_carplay_running">iPhone connected</string>
+</resources>

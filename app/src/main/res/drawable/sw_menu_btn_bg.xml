@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The menu button in the top-left of the home -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true"><shape><corners android:radius="8dp" /><solid android:color="#FF2C3D5C" /><stroke android:width="2dp" android:color="#FF7F9CC9" /></shape></item>
+    <item android:state_selected="true"><shape><corners android:radius="8dp" /><solid android:color="#FF2C3D5C" /><stroke android:width="2dp" android:color="#FF2DE2E6" /></shape></item>
+    <item><shape><corners android:radius="8dp" /><solid android:color="#D9141E30" /><stroke android:width="2dp" android:color="#FF4B6388" /></shape></item>
+</selector>

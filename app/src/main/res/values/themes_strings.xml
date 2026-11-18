@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Head Unit Settings: the Themes tab (ThemesSettingsSection) -->
+<resources>
+    <string name="settings_section_themes">Themes</string>
+    <string name="theme_category_look">Look</string>
+    <string name="theme_synthwave">Synthwave</string>
+    <string name="theme_synthwave_summary">Palm-tree sunset, neon pink and cyan, bold condensed capitals</string>
+    <string name="theme_glass">Glass</string>
+    <string name="theme_glass_summary">Dark ambient light, white frosted glass, clean sentence-case type</string>
+    <string name="theme_info">The look changes the home, Radio, More Apps, Sound, call and CarPlay connecting screens. Tiles, icons and layout stay the same.</string>
+</resources>

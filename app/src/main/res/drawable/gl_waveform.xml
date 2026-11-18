@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The radio tile level meter, white for Glass -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="58dp" android:height="30dp" android:viewportWidth="58" android:viewportHeight="30">
+    <path android:pathData="M1.5,11 h0 a1.5,1.5 0 0 1 1.5,1.5 v5 a1.5,1.5 0 0 1 -1.5,1.5 h0 a1.5,1.5 0 0 1 -1.5,-1.5 v-5 a1.5,1.5 0 0 1 1.5,-1.5 z" android:fillColor="#FFFFFFFF" />
+    <path android:pathData="M6.5,8 h0 a1.5,1.5 0 0 1 1.5,1.5 v11 a1.5,1.5 0 0 1 -1.5,1.5 h0 a1.5,1.5 0 0 1 -1.5,-1.5 v-11 a1.5,1.5 0 0 1 1.5,-1.5 z" android:fillColor="#FFFFFFFF" />
+    <path android:pathData="M11.5,4 h0 a1.5,1.5 0 0 1 1.5,1.5 v19 a1.5,1.5 0 0 1 -1.5,1.5 h0 a1.5,1.5 0 0 1 -1.5,-1.5 v-19 a1.5,1.5 0 0 1 1.5,-1.5 z" android:fillColor="#FFFFFFFF" />
+    <path android:pathData="M16.5,0 h0 a1.5,1.5 0 0 1 1.5,1.5 v27 a1.5,1.5 0 0 1 -1.5,1.5 h0 a1.5,1.5 0 0 1 -1.5,-1.5 v-27 a1.5,1.5 0 0 1 1.5,-1.5 z" android:fillColor="#FFFFFFFF" />
+    <path android:pathData="M21.5,6 h0 a1.5,1.5 0 0 1 1.5,1.5 v15 a1.5,1.5 0 0 1 -1.5,1.5 h0 a1.5,1.5 0 0 1 -1.5,-1.5 v-15 a1.5,1.5 0 0 1 1.5,-1.5 z" android:fillColor="#FFFFFFFF" />
+    <path android:pathData="M26.5,2 h0 a1.5,1.5 0 0 1 1.5,1.5 v23 a1.5,1.5 0 0 1 -1.5,1.5 h0 a1.5,1.5 0 0 1 -1.5,-1.5 v-23 a1.5,1.5 0 0 1 1.5,-1.5 z" android:fillColor="#FFFFFFFF" />
+    <path android:pathData="M31.5,9 h0 a1.5,1.5 0 0 1 1.5,1.5 v9 a1.5,1.5 0 0 1 -1.5,1.5 h0 a1.5,1.5 0 0 1 -1.5,-1.5 v-9 a1.5,1.5 0 0 1 1.5,-1.5 z" android:fillColor="#FFFFFFFF" />
+    <path android:pathData="M36.5,5 h0 a1.5,1.5 0 0 1 1.5,1.5 v17 a1.5,1.5 0 0 1 -1.5,1.5 h0 a1.5,1.5 0 0 1 -1.5,-1.5 v-17 a1.5,1.5 0 0 1 1.5,-1.5 z" android:fillColor="#FFFFFFFF" />
+    <path android:pathData="M41.5,1 h0 a1.5,1.5 0 0 1 1.5,1.5 v25 a1.5,1.5 0 0 1 -1.5,1.5 h0 a1.5,1.5 0 0 1 -1.5,-1.5 v-25 a1.5,1.5 0 0 1 1.5,-1.5 z" android:fillColor="#FFFFFFFF" />
+    <path android:pathData="M46.5,10 h0 a1.5,1.5 0 0 1 1.5,1.5 v7 a1.5,1.5 0 0 1 -1.5,1.5 h0 a1.5,1.5 0 0 1 -1.5,-1.5 v-7 a1.5,1.5 0 0 1 1.5,-1.5 z" android:fillColor="#FFFFFFFF" />
+    <path android:pathData="M51.5,7 h0 a1.5,1.5 0 0 1 1.5,1.5 v13 a1.5,1.5 0 0 1 -1.5,1.5 h0 a1.5,1.5 0 0 1 -1.5,-1.5 v-13 a1.5,1.5 0 0 1 1.5,-1.5 z" android:fillColor="#FFFFFFFF" />
+    <path android:pathData="M56.5,12 h0 a1.5,1.5 0 0 1 1.5,1.5 v3 a1.5,1.5 0 0 1 -1.5,1.5 h0 a1.5,1.5 0 0 1 -1.5,-1.5 v-3 a1.5,1.5 0 0 1 1.5,-1.5 z" android:fillColor="#FFFFFFFF" />
+</vector>

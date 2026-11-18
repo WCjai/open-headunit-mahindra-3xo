@@ -86,3 +86,8 @@ dev-note8.ps1
 # Release signing (never commit)
 key.properties
 *.keystore
+
+# CarPlay accessory identity: personal builds only, kept outside the repo (see carplay/README.md)
+**/offline-mfi/
+*.pk8
+*.p7b

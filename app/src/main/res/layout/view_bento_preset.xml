@@ -1,38 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- One saved station on the Radio screen: the frequency large, the station name small. -->
+<!-- One saved station on the Radio screen: its slot (P1) small, the frequency large. The playing one is selected (pink). -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="0dp"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    android:background="@drawable/tv_preset_bg"
+    android:background="?attr/uiBtnBg"
     android:clickable="true"
     android:focusable="true"
     android:longClickable="true"
     android:padding="6dp">
 
     <TextView
-        android:id="@+id/preset_frequency"
+        android:id="@+id/preset_name"
+        style="@style/SwText.Label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/inter_semibold"
         android:includeFontPadding="false"
-        android:letterSpacing="-0.02"
-        android:textColor="@color/tv_white"
-        android:textSize="23sp"
-        android:maxLines="1" />
+        android:textSize="12sp"
+        android:ellipsize="end" />
 
     <TextView
-        android:id="@+id/preset_name"
+        android:id="@+id/preset_frequency"
+        style="@style/SwText.Clock"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:fontFamily="@font/inter_medium"
+        android:layout_marginTop="3dp"
         android:includeFontPadding="false"
-        android:textColor="@color/tv_white_70"
-        android:textSize="12sp"
-        android:maxLines="1"
-        android:ellipsize="end" />
+        android:textColor="@color/tv_white"
+        android:textSize="26sp"
+        android:maxLines="1" />
 
 </LinearLayout>

@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    More Apps (ui/Head Unit UI Mock.html): the car's own apps as eight glass tiles. MoreAppsActivity
+    opens each; holding the home's More Apps tile still lists every installed app.
+-->
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.andrerinas.openheadunit.main.synthwave.SynthwaveBackdropView
+        android:id="@+id/sw_backdrop"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:importantForAccessibility="no" />
+
+    <include layout="@layout/view_sw_screen_header" />
+
+    <LinearLayout
+        android:id="@+id/sw_app_grid"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="18dp"
+        android:layout_marginRight="18dp"
+        android:layout_marginTop="76dp"
+        android:layout_marginBottom="14dp"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:baselineAligned="false">
+            <LinearLayout
+                android:id="@+id/sw_app_bluetooth"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:background="?attr/uiCardBg"
+                android:foreground="?attr/uiCardPress"
+                android:clickable="true"
+                android:focusable="true">
+                <ImageView
+                    android:layout_width="54dp"
+                    android:layout_height="54dp"
+                    android:importantForAccessibility="no"
+                    app:srcCompat="@drawable/sw_ic_bluetooth"
+                    app:tint="?attr/uiAccent" />
+                <TextView
+                    style="@style/SwText.Header"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/sw_app_bluetooth"
+                    android:textSize="18sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/sw_app_music"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginLeft="14dp"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:background="?attr/uiCardBg"
+                android:foreground="?attr/uiCardPress"
+                android:clickable="true"
+                android:focusable="true">
+                <ImageView
+                    android:layout_width="54dp"
+                    android:layout_height="54dp"
+                    android:importantForAccessibility="no"
+                    app:srcCompat="@drawable/sw_ic_music"
+                    app:tint="?attr/uiAccent" />
+                <TextView
+                    style="@style/SwText.Header"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/sw_app_music"
+                    android:textSize="18sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/sw_app_video"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginLeft="14dp"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:background="?attr/uiCardBg"
+                android:foreground="?attr/uiCardPress"
+                android:clickable="true"
+                android:focusable="true">
+                <ImageView
+                    android:layout_width="54dp"
+                    android:layout_height="54dp"
+                    android:importantForAccessibility="no"
+                    app:srcCompat="@drawable/sw_ic_video"
+                    app:tint="?attr/uiAccent" />
+                <TextView
+                    style="@style/SwText.Header"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/sw_app_video"
+                    android:textSize="18sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/sw_app_eq"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginLeft="14dp"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:background="?attr/uiCardBg"
+                android:foreground="?attr/uiCardPress"
+                android:clickable="true"
+                android:focusable="true">
+                <ImageView
+                    android:layout_width="54dp"
+                    android:layout_height="54dp"
+                    android:importantForAccessibility="no"
+                    app:srcCompat="@drawable/sw_ic_eq"
+                    app:tint="?attr/uiAccent" />
+                <TextView
+                    style="@style/SwText.Header"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/sw_app_eq"
+                    android:textSize="18sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="14dp"
+            android:orientation="horizontal"
+            android:baselineAligned="false">
+            <LinearLayout
+                android:id="@+id/sw_app_tv"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:background="?attr/uiCardBg"
+                android:foreground="?attr/uiCardPress"
+                android:clickable="true"
+                android:focusable="true">
+                <ImageView
+                    android:layout_width="54dp"
+                    android:layout_height="54dp"
+                    android:importantForAccessibility="no"
+                    app:srcCompat="@drawable/sw_ic_tv"
+                    app:tint="?attr/uiAccent" />
+                <TextView
+                    style="@style/SwText.Header"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/sw_app_tv"
+                    android:textSize="18sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/sw_app_steering"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginLeft="14dp"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:background="?attr/uiCardBg"
+                android:foreground="?attr/uiCardPress"
+                android:clickable="true"
+                android:focusable="true">
+                <ImageView
+                    android:layout_width="54dp"
+                    android:layout_height="54dp"
+                    android:importantForAccessibility="no"
+                    app:srcCompat="@drawable/sw_ic_steering"
+                    app:tint="?attr/uiAccent" />
+                <TextView
+                    style="@style/SwText.Header"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/sw_app_steering"
+                    android:textSize="18sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/sw_app_settings"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginLeft="14dp"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:background="?attr/uiCardBg"
+                android:foreground="?attr/uiCardPress"
+                android:clickable="true"
+                android:focusable="true">
+                <ImageView
+                    android:layout_width="54dp"
+                    android:layout_height="54dp"
+                    android:importantForAccessibility="no"
+                    app:srcCompat="@drawable/sw_ic_settings"
+                    app:tint="?attr/uiAccent" />
+                <TextView
+                    style="@style/SwText.Header"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/sw_app_settings"
+                    android:textSize="18sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/sw_app_radio"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginLeft="14dp"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:background="?attr/uiCardBg"
+                android:foreground="?attr/uiCardPress"
+                android:clickable="true"
+                android:focusable="true">
+                <ImageView
+                    android:layout_width="54dp"
+                    android:layout_height="54dp"
+                    android:importantForAccessibility="no"
+                    app:srcCompat="@drawable/sw_ic_radio"
+                    app:tint="?attr/uiAccent" />
+                <TextView
+                    style="@style/SwText.Header"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/sw_app_radio"
+                    android:textSize="18sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+    </LinearLayout>
+
+</FrameLayout>

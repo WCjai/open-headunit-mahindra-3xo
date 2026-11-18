@@ -167,4 +167,17 @@
     <string name="tv_radio_off">Radio off</string>
     <string name="tv_radio_power">Turn the radio on or off</string>
     <string name="tv_radio_hint">Tap to tune · hold a station to save the one playing</string>
+    <!-- Apple CarPlay (carplay/README.md) -->
+    <string name="carplay_title">Apple CarPlay</string>
+    <string name="carplay_back">Back to CarPlay</string>
+    <string name="carplay_phone">iPhone</string>
+    <string name="carplay_menu">Apple CarPlay</string>
+    <string name="carplay_menu_detail">CarPlay settings</string>
+    <string name="carplay_unavailable">Apple CarPlay could not start on this build</string>
+    <!-- What the iPhone is told about the car (CarPlayLauncher.applyCarDefaultsOnce, CarPlaySession) -->
+    <string name="carplay_car_name" translatable="false">XUV 3XO</string>
+    <string name="carplay_car_make" translatable="false">Mahindra</string>
+    <string name="carplay_car_model" translatable="false">XUV 3XO</string>
+    <!-- Under the car icon in CarPlay, which comes back to this app's home -->
+    <string name="carplay_car_icon_label" translatable="false">Mahindra</string>
 </resources>

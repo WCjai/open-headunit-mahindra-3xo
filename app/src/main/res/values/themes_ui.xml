@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The two looks for the head-unit screens, applied over the activity theme by UiTheme.
+    Synthwave: the sunset coast, pink-edged glass, neon cyan, condensed capitals.
+    Glass: the earlier tvOS-style look, dark ambient light, white frosted glass, Inter, sentence case.
+-->
+<resources>
+
+    <style name="UiTheme" />
+
+    <style name="UiTheme.Synthwave">
+        <item name="uiAccent">@color/sw_cyan</item>
+        <item name="uiLive">@color/sw_cyan</item>
+        <item name="uiHighlight">@color/sw_pink</item>
+        <item name="uiTextTitle">@color/sw_text</item>
+        <item name="uiTextDate">@color/sw_date</item>
+        <item name="uiTextSoft">@color/sw_soft</item>
+        <item name="uiTextIce">@color/sw_ice</item>
+        <item name="uiIconIdle">@color/sw_dot</item>
+        <item name="uiScale">@color/sw_scale</item>
+        <item name="uiScrim">@color/sw_scrim</item>
+        <item name="uiDivider">@color/sw_divider</item>
+        <item name="uiShadow">#FF000000</item>
+        <item name="uiHighlightGlow">#A6FF5FA2</item>
+
+        <item name="uiFontDisplay">@font/sw_saira_black</item>
+        <item name="uiFontLabel">@font/sw_archivo_narrow_bold</item>
+        <item name="uiFontDigits">@font/sw_oxanium_extrabold</item>
+        <item name="uiFontDigitsBold">@font/sw_oxanium_bold</item>
+        <item name="uiFontDigitsMedium">@font/sw_oxanium_semibold</item>
+        <item name="uiCaps">true</item>
+        <item name="uiTrackingWide">0.04</item>
+        <item name="uiTracking">0.03</item>
+        <item name="uiTrackingTight">0.02</item>
+
+        <item name="uiCardRadius">14dp</item>
+        <item name="uiCardBg">@drawable/sw_card_bg</item>
+        <item name="uiCardPress">@drawable/sw_card_press</item>
+        <item name="uiCardAltBg">@drawable/sw_card_cyan_bg</item>
+        <item name="uiCardLiveBg">@drawable/sw_card_live_bg</item>
+        <item name="uiBtnBg">@drawable/sw_btn_bg</item>
+        <item name="uiChipBg">@drawable/sw_chip_bg</item>
+        <item name="uiChipAccentBg">@drawable/sw_chip_cyan_bg</item>
+        <item name="uiDotTile">@drawable/sw_dot_tile</item>
+        <item name="uiBadgeBg">@drawable/sw_badge_bg</item>
+        <item name="uiHomePillBg">@drawable/sw_home_pill_bg</item>
+        <item name="uiMenuBg">@drawable/sw_menu_bg</item>
+        <item name="uiMenuBtnBg">@drawable/sw_menu_btn_bg</item>
+        <item name="uiProgress">@drawable/sw_progress</item>
+        <item name="uiAvatarRing">@drawable/sw_avatar_ring</item>
+        <item name="uiAvatarBg">@drawable/sw_avatar_bg</item>
+        <item name="uiAlbumBg">@drawable/sw_album_bg</item>
+        <item name="uiAnswerBg">@drawable/sw_answer_bg</item>
+        <item name="uiDeclineBg">@drawable/sw_decline_bg</item>
+        <item name="uiLogoGlow">@drawable/sw_logo_glow</item>
+        <item name="uiStatusDot">@drawable/sw_amber_dot</item>
+        <item name="uiWaveform">@drawable/sw_waveform</item>
+        <item name="uiSeek">@drawable/sw_seek</item>
+        <item name="uiSeekThumb">@drawable/sw_seek_thumb</item>
+        <item name="uiHomeButtonBg">@drawable/tv_home_button_bg</item>
+    </style>
+
+    <style name="UiTheme.Glass">
+        <item name="uiAccent">@color/gl_accent</item>
+        <item name="uiLive">@color/gl_live</item>
+        <item name="uiHighlight">@color/gl_highlight</item>
+        <item name="uiTextTitle">@color/tv_white</item>
+        <item name="uiTextDate">@color/tv_white_80</item>
+        <item name="uiTextSoft">@color/tv_white_60</item>
+        <item name="uiTextIce">@color/tv_white_80</item>
+        <item name="uiIconIdle">@color/tv_white_90</item>
+        <item name="uiScale">@color/tv_white_70</item>
+        <item name="uiScrim">@color/tv_scrim</item>
+        <item name="uiDivider">@color/tv_white_10</item>
+        <item name="uiShadow">#00000000</item>
+        <item name="uiHighlightGlow">#00000000</item>
+
+        <item name="uiFontDisplay">@font/inter_bold</item>
+        <item name="uiFontLabel">@font/inter_medium</item>
+        <item name="uiFontDigits">@font/inter_semibold</item>
+        <item name="uiFontDigitsBold">@font/inter_semibold</item>
+        <item name="uiFontDigitsMedium">@font/inter_medium</item>
+        <item name="uiCaps">false</item>
+        <item name="uiTrackingWide">0</item>
+        <item name="uiTracking">0</item>
+        <item name="uiTrackingTight">-0.01</item>
+
+        <item name="uiCardRadius">22dp</item>
+        <item name="uiCardBg">@drawable/gl_card_bg</item>
+        <item name="uiCardPress">@drawable/gl_card_press</item>
+        <item name="uiCardAltBg">@drawable/gl_card_bg</item>
+        <item name="uiCardLiveBg">@drawable/gl_card_live_bg</item>
+        <item name="uiBtnBg">@drawable/gl_btn_bg</item>
+        <item name="uiChipBg">@drawable/gl_chip_bg</item>
+        <item name="uiChipAccentBg">@drawable/gl_chip_bg</item>
+        <item name="uiDotTile">@drawable/gl_dot_tile</item>
+        <item name="uiBadgeBg">@drawable/gl_badge_bg</item>
+        <item name="uiHomePillBg">@drawable/gl_home_pill_bg</item>
+        <item name="uiMenuBg">@drawable/tv_menu_bg</item>
+        <item name="uiMenuBtnBg">@drawable/gl_menu_btn_bg</item>
+        <item name="uiProgress">@drawable/gl_progress</item>
+        <item name="uiAvatarRing">@drawable/gl_avatar_ring</item>
+        <item name="uiAvatarBg">@drawable/tv_avatar_bg</item>
+        <item name="uiAlbumBg">@drawable/gl_album_bg</item>
+        <item name="uiAnswerBg">@drawable/gl_answer_bg</item>
+        <item name="uiDeclineBg">@drawable/gl_decline_bg</item>
+        <item name="uiLogoGlow">@drawable/gl_logo_glow</item>
+        <item name="uiStatusDot">@drawable/tv_dot</item>
+        <item name="uiWaveform">@drawable/gl_waveform</item>
+        <item name="uiSeek">@drawable/gl_seek</item>
+        <item name="uiSeekThumb">@drawable/gl_seek_thumb</item>
+        <item name="uiHomeButtonBg">@drawable/gl_home_button_bg</item>
+    </style>
+
+</resources>

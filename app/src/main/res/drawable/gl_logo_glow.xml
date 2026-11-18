@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A faint white halo behind the Android Auto and CarPlay logos -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval">
+    <gradient android:type="radial" android:gradientRadius="50%p"
+        android:startColor="#26FFFFFF" android:centerColor="#0AFFFFFF" android:endColor="#00FFFFFF" />
+</shape>

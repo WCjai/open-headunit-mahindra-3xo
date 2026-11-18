@@ -1,0 +1,45 @@
+// CarPlay engine: DiPlay's ":shared" module (iAP2, USB/NCM, AirPlay, media), GPL-3.0.
+// Vendored from github.com/shihabal3amri/DiPlay 0.2.22 (615b32ce). Ported from AGP 9 to this
+// project's AGP 8.13 / compileSdk 36; source is otherwise kept as upstream for easy merges.
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+}
+android {
+    namespace = 'com.shilapi.xcertplay.shared'
+    compileSdk = 36
+    ndkVersion = '29.0.14206865'
+
+    defaultConfig {
+        minSdk = 24
+        consumerProguardFiles 'ambient-consumer-rules.pro'
+        ndk {
+            abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64'
+        }
+        externalNativeBuild {
+            ndkBuild {
+                arguments 'APP_PLATFORM=android-24'
+            }
+        }
+    }
+    externalNativeBuild {
+        ndkBuild {
+            path = file('src/main/jni/Android.mk')
+        }
+    }
+    buildFeatures {
+        aidl true
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+    kotlinOptions {
+        jvmTarget = '11'
+    }
+}
+dependencies {
+    implementation 'androidx.car.app:app:1.4.0'
+    implementation 'org.bouncycastle:bcprov-jdk18on:1.79'
+    implementation 'org.jmdns:jmdns:3.6.3'
+}

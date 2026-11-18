@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The look of the home, Radio, More Apps, Sound and call screens, filled in by a UiTheme overlay
+    (themes_ui.xml): Synthwave or Glass. Layouts and sizes are shared; only these change.
+-->
+<resources>
+    <!-- Colours -->
+    <attr name="uiAccent" format="color" />          <!-- icon tint on tiles -->
+    <attr name="uiLive" format="color" />            <!-- "connected", live status -->
+    <attr name="uiHighlight" format="color" />       <!-- playing station, progress, lit icons -->
+    <attr name="uiTextTitle" format="color" />
+    <attr name="uiTextDate" format="color" />
+    <attr name="uiTextSoft" format="color" />        <!-- small labels -->
+    <attr name="uiTextIce" format="color" />         <!-- secondary lines -->
+    <attr name="uiIconIdle" format="color" />        <!-- a logo when nothing is connected -->
+    <attr name="uiScale" format="color" />
+    <attr name="uiScrim" format="color" />
+    <attr name="uiDivider" format="color" />
+    <attr name="uiShadow" format="color" />          <!-- text drop shadow -->
+    <attr name="uiHighlightGlow" format="color" />   <!-- neon glow round highlighted digits -->
+
+    <!-- Type -->
+    <attr name="uiFontDisplay" format="reference" />
+    <attr name="uiFontLabel" format="reference" />
+    <attr name="uiFontDigits" format="reference" />
+    <attr name="uiFontDigitsBold" format="reference" />
+    <attr name="uiFontDigitsMedium" format="reference" />
+    <attr name="uiCaps" format="boolean" />
+    <attr name="uiTrackingWide" format="float" />
+    <attr name="uiTracking" format="float" />
+    <attr name="uiTrackingTight" format="float" />
+
+    <!-- Shapes -->
+    <attr name="uiCardRadius" format="dimension" />
+    <attr name="uiCardBg" format="reference" />
+    <attr name="uiCardPress" format="reference" />
+    <attr name="uiCardAltBg" format="reference" />
+    <attr name="uiCardLiveBg" format="reference" />
+    <attr name="uiBtnBg" format="reference" />
+    <attr name="uiChipBg" format="reference" />
+    <attr name="uiChipAccentBg" format="reference" />
+    <attr name="uiDotTile" format="reference" />
+    <attr name="uiBadgeBg" format="reference" />
+    <attr name="uiHomePillBg" format="reference" />
+    <attr name="uiMenuBg" format="reference" />
+    <attr name="uiMenuBtnBg" format="reference" />
+    <attr name="uiProgress" format="reference" />
+    <attr name="uiAvatarRing" format="reference" />
+    <attr name="uiAvatarBg" format="reference" />
+    <attr name="uiAlbumBg" format="reference" />
+    <attr name="uiAnswerBg" format="reference" />
+    <attr name="uiDeclineBg" format="reference" />
+    <attr name="uiLogoGlow" format="reference" />
+    <attr name="uiStatusDot" format="reference" />
+    <attr name="uiWaveform" format="reference" />
+    <attr name="uiSeek" format="reference" />
+    <attr name="uiSeekThumb" format="reference" />
+    <attr name="uiHomeButtonBg" format="reference" />
+</resources>

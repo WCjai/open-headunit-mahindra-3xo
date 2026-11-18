@@ -6,6 +6,7 @@ import android.hardware.usb.UsbManager
 import android.os.SystemClock
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import com.andrerinas.openheadunit.carplay.CarPlayLauncher
 import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.R
 import com.andrerinas.openheadunit.aap.AapService
@@ -711,7 +712,10 @@ class UsbLauncherManager(val service: AapService) {
             return
         }
         UsbDeviceDiagnostics.logDeviceList(service, usbManager, "service scan (force=$force)")
-        val deviceList = usbManager.deviceList.values.filter { UsbDeviceCompat.isConnectable(service, it) }
+        val attached = usbManager.deviceList.values
+        // An iPhone left plugged in across a boot sends no fresh attach intent; open CarPlay here.
+        if (CarPlayLauncher.scanForIphone(service, attached)) return
+        val deviceList = attached.filter { UsbDeviceCompat.isConnectable(service, it) }
 
         // Check for devices already in accessory mode first.
         // After AOA switch the device re-enumerates and appears as a new USB device — we must

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The glass card while its phone is connected: a cyan edge with a soft glow -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item><shape><corners android:radius="14dp" />
+        <gradient android:angle="315" android:startColor="#29FFFFFF" android:centerColor="#0AFFFFFF" android:endColor="#47280E3C" /></shape></item>
+    <item><shape><corners android:radius="14dp" />
+        <gradient android:angle="315" android:startColor="#26FFFFFF" android:centerX="0.3" android:centerColor="#00FFFFFF" android:endColor="#00FFFFFF" /></shape></item>
+    <item><shape><corners android:radius="14dp" /><stroke android:width="5dp" android:color="#262DE2E6" /></shape></item>
+    <item><shape><corners android:radius="14dp" /><stroke android:width="2dp" android:color="#FF2DE2E6" /></shape></item>
+</layer-list>

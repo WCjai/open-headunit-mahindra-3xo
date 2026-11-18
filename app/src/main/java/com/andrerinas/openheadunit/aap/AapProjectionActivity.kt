@@ -27,6 +27,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.R
+import com.andrerinas.openheadunit.main.theme.UiTheme
 import com.andrerinas.openheadunit.aap.protocol.messages.TouchEvent
 import com.andrerinas.openheadunit.aap.protocol.messages.VideoFocusEvent
 import com.andrerinas.openheadunit.app.SurfaceActivity
@@ -1929,9 +1930,10 @@ class AapProjectionActivity : SurfaceActivity(), IProjectionView.Callbacks, Vide
         val side = if (settings.rightHandDrive) android.view.Gravity.LEFT else android.view.Gravity.RIGHT
         val button = android.widget.ImageView(this).apply {
             id = R.id.projection_home_button
-            setImageResource(R.drawable.tv_ic_home)
-            setColorFilter(android.graphics.Color.BLACK)
-            setBackgroundResource(R.drawable.tv_home_button_bg)
+            setImageResource(R.drawable.sw_ic_home)
+            // Glass puts a black icon on a white disc; Synthwave a white one on dark glass.
+            setColorFilter(if (UiTheme.isGlass(context)) android.graphics.Color.BLACK else android.graphics.Color.WHITE)
+            background = UiTheme.drawable(context, R.attr.uiHomeButtonBg)
             setPadding(padding, padding, padding, padding)
             contentDescription = getString(R.string.tv_back_to_home)
             isClickable = true

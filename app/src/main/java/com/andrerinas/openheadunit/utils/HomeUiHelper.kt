@@ -37,6 +37,7 @@ import androidx.annotation.IdRes
 import androidx.core.content.ContextCompat
 import androidx.core.view.doOnNextLayout
 import com.andrerinas.openheadunit.R
+import com.andrerinas.openheadunit.main.theme.UiTheme
 import com.andrerinas.openheadunit.connection.ConnectionStage
 import com.andrerinas.openheadunit.main.BarFitPolicy
 import com.andrerinas.openheadunit.main.HomeColorPolicy
@@ -979,82 +980,77 @@ object HomeUiHelper {
         rootView.findViewById<View>(R.id.home_primary_card)?.tag == TV_CARD_TAG
 
     /**
-     * The tvOS home's Android Auto card (view_tv_aa_card): glass, the connection in a chip, a ringed
-     * phone in the middle that turns white and pulses green while a phone is connected, and one wide
-     * button, white for "Back to Android Auto". Text and visibility were already set by
-     * [applyPrimaryCard]; this paints and, for a live session, names the phone.
+     * The synthwave home's Android Auto card (view_tv_aa_card): glass with a pink edge, the
+     * connection in a chip, the Android Auto logo in the grid panel, and one wide button. While a
+     * phone projects, the edge turns cyan, the logo glows cyan and pulses, and the button reads
+     * "BACK to Android Auto". With nothing happening the panel shows the logo alone, as the mock
+     * does; any other state shows its title and step under the logo. Text and visibility were
+     * already set by [applyPrimaryCard]; this paints and, for a live session, names the phone.
      */
     private fun paintTvCard(context: Context, rootView: View, card: View, decision: Decision, phoneName: String?) {
         val active = decision.status == Status.ACTIVE_SESSION
-        card.setBackgroundResource(if (active) R.drawable.tv_card_active_bg else R.drawable.tv_card_bg)
+        val idle = decision.status == Status.READY || decision.status == Status.WAITING
+        card.background = UiTheme.drawable(card.context, if (active) R.attr.uiCardLiveBg else R.attr.uiCardBg)
+        // The whole card is the button (HomeFragment): it lights up under a finger like a button.
+        (card as? FrameLayout)?.foreground = UiTheme.drawable(context, R.attr.uiCardPress)
+        // No chip in the corner: the status reads under the logo instead.
+        rootView.findViewById<View>(R.id.tv_aa_chip)?.visibility = View.GONE
         val white = Color.WHITE
-        val muted = ContextCompat.getColor(context, R.color.tv_white_70)
+        val cyan = UiTheme.color(context, R.attr.uiLive)
+        val ice = UiTheme.color(context, R.attr.uiTextIce)
+        rootView.findViewById<View>(R.id.tv_aa_scope)?.let { scope ->
+            if (scope.background !is com.andrerinas.openheadunit.main.synthwave.ScopeDrawable) {
+                com.andrerinas.openheadunit.main.synthwave.Synthwave.scope(scope)
+            }
+        }
 
-        rootView.findViewById<LinearLayout>(R.id.home_primary_content)?.gravity = Gravity.CENTER_HORIZONTAL
         rootView.findViewById<TextView>(R.id.home_primary_kicker)?.apply {
             // The chip names the connection; "Android Auto" is already the card's own label.
             text = context.getString(connectionLabel(decision.primary))
-            setTextColor(white)
-            gravity = Gravity.CENTER_VERTICAL
         }
         rootView.findViewById<ImageView>(R.id.tv_aa_chip_icon)?.setImageResource(iconRes(decision.primary))
         rootView.findViewById<TextView>(R.id.home_primary_title)?.apply {
             if (active && !phoneName.isNullOrBlank()) text = phoneName
             setTextColor(white)
-            gravity = Gravity.CENTER
+            visibility = if (idle) View.GONE else View.VISIBLE
+            setTag(R.id.sw_idle_hidden, idle)
         }
         rootView.findViewById<TextView>(R.id.home_primary_subtitle)?.apply {
-            if (active) {
-                text = context.getString(R.string.tv_aa_connected)
-                setTextColor(ContextCompat.getColor(context, R.color.tv_connected_text))
-            } else {
-                setTextColor(muted)
+            when {
+                active -> {
+                    text = context.getString(R.string.sw_connected_tap)
+                    setTextColor(cyan)
+                }
+                // Idle: the tile is the button, so no "tap to connect" line under the logo.
+                idle -> Unit
+                else -> setTextColor(ice)
             }
-            gravity = Gravity.CENTER
-        }
-        rootView.findViewById<TextView>(R.id.home_primary_detail)?.apply {
-            setTextColor(ContextCompat.getColor(context, R.color.tv_white_60))
-            gravity = Gravity.CENTER
+            visibility = if (idle) View.GONE else View.VISIBLE
+            setTag(R.id.sw_idle_hidden, idle)
         }
 
         val countdown = rootView.findViewById<TextView>(R.id.home_countdown)
-        countdown?.background = null
-        countdown?.setTextColor(if (active) Color.BLACK else white)
         val counting = countdown?.visibility == View.VISIBLE
         rootView.findViewById<ImageView>(R.id.tv_aa_icon)?.apply {
             visibility = if (counting) View.GONE else View.VISIBLE
-            setColorFilter(
-                if (active) ContextCompat.getColor(context, R.color.tv_connected_icon) else white,
-                PorterDuff.Mode.SRC_IN
-            )
-            alpha = if (active) 1f else 0.9f
+            setColorFilter(if (active) cyan else UiTheme.color(context, R.attr.uiIconIdle), PorterDuff.Mode.SRC_IN)
         }
-        rootView.findViewById<View>(R.id.tv_aa_disc)
-            ?.setBackgroundResource(if (active) R.drawable.tv_disc_white else R.drawable.tv_disc_glass)
-        rootView.findViewById<View>(R.id.tv_aa_ring)
-            ?.setBackgroundResource(if (active) R.drawable.tv_ring_green else R.drawable.tv_ring_bg)
         setTvPulse(rootView.findViewById(R.id.tv_aa_pulse), active)
 
-        rootView.findViewById<TextView>(R.id.home_primary_action)?.apply {
-            if (active) {
-                setBackgroundResource(R.drawable.tv_white_btn_bg)
-                setTextColor(Color.BLACK)
-            } else {
-                setBackgroundResource(R.drawable.tv_wide_glass_btn_bg)
-                setTextColor(white)
-            }
-        }
-        rootView.findViewById<TextView>(R.id.home_primary_cancel)?.apply {
-            setBackgroundResource(R.drawable.tv_wide_glass_btn_bg)
-            setTextColor(white)
-        }
+        // No "Connect over USB" or "Back to Android Auto" button: tapping the card does it. Cancel stays
+        // while a connection is on its way (applyPrimaryCard shows it then).
+        rootView.findViewById<TextView>(R.id.home_primary_action)?.visibility = View.GONE
+        rootView.findViewById<TextView>(R.id.home_primary_cancel)?.let { it.background = UiTheme.drawable(it.context, R.attr.uiBtnBg) }
 
-        // The bring-up bar: white on a faint track, like the song's progress on Now Playing.
+        // The bring-up bar: cyan on a faint track, like the song's progress on Now Playing.
         val radius = dp(context, 3).toFloat()
         rootView.findViewById<View>(R.id.home_primary_progress)?.background =
             rounded(withAlpha(white, PROGRESS_TRACK_ALPHA), radius)
-        rootView.findViewById<View>(R.id.home_primary_progress_fill)?.background = rounded(white, radius)
+        rootView.findViewById<View>(R.id.home_primary_progress_fill)?.background = rounded(cyan, radius)
     }
+
+    /** The ring that breathes out from a logo while its phone is connected (the CarPlay card's too). */
+    fun setPulse(pulse: View?, on: Boolean) = setTvPulse(pulse, on)
 
     private fun connectionLabel(connection: Connection): Int = when (connection) {
         Connection.USB -> R.string.home_kicker_cable

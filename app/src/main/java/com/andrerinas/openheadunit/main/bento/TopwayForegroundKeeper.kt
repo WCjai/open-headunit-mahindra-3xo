@@ -108,6 +108,8 @@ object TopwayForegroundKeeper {
             if (resumed != null || !recent(causeAtMs) || attempts >= MAX_ATTEMPTS) return
             val component = App.provide(ctx)
             if (component.commManager.connectionState.value is CommManager.ConnectionState.TransportStarted) return
+            // CarPlay brings its own screen back (CarPlayTopwayKeys); ours must not cover it.
+            if (com.andrerinas.openheadunit.carplay.CarPlaySession.active.value) return
             if (!component.settings.raiseProjectionDuringCall) return
             attempts++
             val screen = target()

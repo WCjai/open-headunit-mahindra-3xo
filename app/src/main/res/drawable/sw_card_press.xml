@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Foreground of a pressable card: it lights up while held -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true"><shape><corners android:radius="14dp" /><solid android:color="#24FFFFFF" /></shape></item>
+    <item android:state_focused="true"><shape><corners android:radius="14dp" /><stroke android:width="2dp" android:color="#FF2DE2E6" /></shape></item>
+    <item><color android:color="#00000000" /></item>
+</selector>

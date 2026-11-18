@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Glass card while its phone is connected: the old tvOS green wash from the corner -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item><shape><corners android:radius="22dp" />
+        <gradient android:angle="270" android:startColor="#21FFFFFF" android:endColor="#0DFFFFFF" /></shape></item>
+    <item><shape><corners android:radius="22dp" />
+        <gradient android:angle="315" android:startColor="#334ADE80" android:endColor="#00FFFFFF" /></shape></item>
+    <item><shape><corners android:radius="22dp" /><stroke android:width="1.5dp" android:color="#804ADE80" /></shape></item>
+</layer-list>

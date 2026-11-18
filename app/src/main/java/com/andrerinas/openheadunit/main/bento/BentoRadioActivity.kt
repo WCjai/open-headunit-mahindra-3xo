@@ -3,19 +3,26 @@ package com.andrerinas.openheadunit.main.bento
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import com.andrerinas.openheadunit.R
+import com.andrerinas.openheadunit.main.theme.UiTheme
 import com.andrerinas.openheadunit.app.BaseActivity
 import com.andrerinas.openheadunit.connection.carkey.topway.TopwayRadio
+import com.andrerinas.openheadunit.main.synthwave.Synthwave
+import com.andrerinas.openheadunit.main.synthwave.SynthwaveBackdropView
+import com.andrerinas.openheadunit.main.synthwave.TunerScaleView
 import com.andrerinas.openheadunit.utils.ToastUtils
 
 /**
- * The car's FM/AM radio inside this app, in the bento style. Drives the unit's own tuner through
- * [TopwayRadio], the same MCU commands TopWay's radio app sends; opening this screen puts the
- * car's speakers on the tuner, as opening that app does.
+ * The car's FM/AM radio inside this app, in the synthwave style. Drives the unit's own tuner through
+ * [TopwayRadio], the same MCU commands TopWay's radio app sends; opening this screen puts the car's
+ * speakers on the tuner, as opening that app does.
  *
  * Stations: tap to tune, hold to store the playing frequency there. Eighteen per band, six a page.
  */
@@ -24,6 +31,7 @@ class BentoRadioActivity : BaseActivity() {
     companion object {
         private const val PER_PAGE = 6
         private const val PAGES = TopwayRadio.PRESET_SLOTS / PER_PAGE
+        private const val CLOCK_TICK_MS = 10_000L
 
         fun open(context: Context) {
             context.startActivity(Intent(context, BentoRadioActivity::class.java)
@@ -32,7 +40,7 @@ class BentoRadioActivity : BaseActivity() {
     }
 
     private lateinit var radio: TopwayRadio
-    private lateinit var title: TextView
+    private lateinit var topBar: Synthwave.TopBar
     private lateinit var station: TextView
     private lateinit var power: View
     private lateinit var tuner: View
@@ -40,29 +48,39 @@ class BentoRadioActivity : BaseActivity() {
     private lateinit var frequency: TextView
     private lateinit var unit: TextView
     private lateinit var radioText: TextView
-    private lateinit var dial: TunerDialView
+    private lateinit var dial: TunerScaleView
     private lateinit var bandFm: TextView
     private lateinit var bandAm: TextView
-    private lateinit var af: TextView
-    private lateinit var ta: TextView
     private lateinit var scan: TextView
     private lateinit var page: TextView
-    private lateinit var hint: TextView
     private val presetViews = ArrayList<View>()
+    private val main = Handler(Looper.getMainLooper())
 
     private var currentPage = 0
     private var pageChosen = false
-    /** Shown while the dial is dragged, until the tuner reports where it went. */
+    /** Shown while the scale is dragged, until the tuner reports where it went. */
     private var previewFrequency = 0
 
     private val listener: () -> Unit = { render() }
+    private val clockTick = object : Runnable {
+        override fun run() {
+            topBar.render()
+            main.postDelayed(this, CLOCK_TICK_MS)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_bento_radio)
         radio = TopwayRadio.get(this)
 
-        title = findViewById(R.id.radio_title)
+        findViewById<TextView>(R.id.sw_header_title).setText(R.string.tv_radio)
+        topBar = Synthwave.TopBar(
+            clock = findViewById(R.id.sw_header_clock),
+            date = null,
+            bluetooth = findViewById(R.id.sw_header_bt),
+            wifi = findViewById(R.id.sw_header_wifi),
+        )
         station = findViewById(R.id.radio_station)
         power = findViewById(R.id.radio_power)
         tuner = findViewById(R.id.radio_tuner)
@@ -73,18 +91,18 @@ class BentoRadioActivity : BaseActivity() {
         dial = findViewById(R.id.radio_dial)
         bandFm = findViewById(R.id.radio_band_fm)
         bandAm = findViewById(R.id.radio_band_am)
-        af = findViewById(R.id.radio_af)
-        ta = findViewById(R.id.radio_ta)
         scan = findViewById(R.id.radio_scan)
         page = findViewById(R.id.radio_page)
-        hint = findViewById(R.id.radio_hint)
         radioText.isSelected = true // marquee
+
+        Synthwave.scope(tuner)
+        findViewById<SynthwaveBackdropView>(R.id.sw_backdrop).frost(
+            findViewById(R.id.radio_tuner_card), findViewById(R.id.radio_presets_card),
+        )
 
         findViewById<View>(R.id.bento_back).setOnClickListener { finish() }
         bandFm.setOnClickListener { radio.selectFm() }
         bandAm.setOnClickListener { radio.selectAm() }
-        af.setOnClickListener { radio.setAf(!radio.af) }
-        ta.setOnClickListener { radio.setTa(!radio.ta) }
         scan.setOnClickListener { radio.autoStore() }
         // Off gives the speakers back; on takes them again.
         power.setOnClickListener {
@@ -98,11 +116,10 @@ class BentoRadioActivity : BaseActivity() {
         }
         findViewById<View>(R.id.radio_seek_down).setOnClickListener { radio.seekDown() }
         findViewById<View>(R.id.radio_seek_up).setOnClickListener { radio.seekUp() }
-        findViewById<View>(R.id.radio_step_down).setOnClickListener { radio.stepDown() }
-        findViewById<View>(R.id.radio_step_up).setOnClickListener { radio.stepUp() }
         findViewById<View>(R.id.radio_page_prev).setOnClickListener { turnPage(-1) }
         findViewById<View>(R.id.radio_page_next).setOnClickListener { turnPage(1) }
-        dial.listener = object : TunerDialView.Listener {
+        dial.interactive = true
+        dial.listener = object : TunerScaleView.Listener {
             override fun onPreview(frequency: Int) {
                 previewFrequency = frequency
                 showFrequency(frequency)
@@ -114,9 +131,8 @@ class BentoRadioActivity : BaseActivity() {
         }
 
         buildPresets()
-        listOf(R.id.bento_back, R.id.radio_band_fm, R.id.radio_band_am, R.id.radio_af, R.id.radio_ta,
-            R.id.radio_scan, R.id.radio_seek_down, R.id.radio_seek_up, R.id.radio_step_down,
-            R.id.radio_step_up, R.id.radio_page_prev, R.id.radio_page_next, R.id.radio_power,
+        listOf(R.id.bento_back, R.id.radio_band_fm, R.id.radio_band_am, R.id.radio_scan,
+            R.id.radio_seek_down, R.id.radio_seek_up, R.id.radio_page_prev, R.id.radio_page_next, R.id.radio_power,
         ).forEach { BentoUi.addPressFeedback(findViewById(it)) }
 
         radio.attach(this, listener)
@@ -128,11 +144,13 @@ class BentoRadioActivity : BaseActivity() {
         radio.enterForeground()
         radio.refresh()
         render()
+        main.post(clockTick)
     }
 
     override fun onPause() {
         super.onPause()
         TopwayForegroundKeeper.onPaused(TopwayForegroundKeeper.Screen.RADIO)
+        main.removeCallbacks(clockTick)
     }
 
     /**
@@ -152,7 +170,7 @@ class BentoRadioActivity : BaseActivity() {
     /** Three rows of two station buttons. */
     private fun buildPresets() {
         val container = findViewById<LinearLayout>(R.id.radio_presets)
-        val gap = resources.getDimensionPixelSize(R.dimen.bento_gap) * 2 / 3
+        val gap = (10 * resources.displayMetrics.density).toInt()
         for (row in 0 until PER_PAGE / 2) {
             val line = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL
@@ -193,13 +211,16 @@ class BentoRadioActivity : BaseActivity() {
 
     private fun showFrequency(value: Int) {
         frequency.text = TopwayRadio.format(radio.band, value)
-        unit.text = TopwayRadio.unitOf(radio.band)
+        unit.text = getString(R.string.sw_unit_band, TopwayRadio.unitOf(radio.band), TopwayRadio.bandName(radio.band))
     }
 
     private fun render() {
         val err = radio.error
         if (err != null) {
             kicker.text = getString(R.string.bento_radio_unavailable)
+            // Keep the buttons labelled, so the screen does not look broken while the tuner is silent.
+            scan.setText(R.string.bento_radio_scan)
+            renderPresets()
             return
         }
         // The tuner's report wins over a drag preview once it has caught up.
@@ -208,22 +229,18 @@ class BentoRadioActivity : BaseActivity() {
 
         val bandName = TopwayRadio.bandName(radio.band)
         val playing = radio.isPlaying
-        title.setText(if (radio.isFm) R.string.tv_radio_fm_title else R.string.tv_radio_am_title)
-        kicker.text = "$bandName  ·  ${getString(R.string.tv_radio_tuning)}"
+        kicker.text = getString(R.string.sw_band_chip, bandName, getString(if (playing) R.string.sw_on_air else R.string.sw_radio_off))
         station.text = if (playing) radio.stationName else getString(R.string.tv_radio_off)
+        station.visibility = if (station.text.isNullOrBlank()) View.GONE else View.VISIBLE
         radioText.text = radio.radioText
         radioText.visibility = if (radio.radioText.isBlank() || !playing) View.INVISIBLE else View.VISIBLE
         power.isSelected = playing
-        tuner.alpha = if (playing) 1f else 0.45f
+        tuner.alpha = if (playing) 1f else 0.5f
         val range = radio.range
         dial.setTuning(range.min, range.max, range.step, !radio.isFm, radio.frequency)
 
         bandFm.isSelected = radio.isFm
         bandAm.isSelected = !radio.isFm
-        af.visibility = if (radio.isFm) View.VISIBLE else View.GONE
-        ta.visibility = af.visibility
-        af.isSelected = radio.af
-        ta.isSelected = radio.ta
         scan.isSelected = radio.autoStoring
         scan.setText(if (radio.autoStoring) R.string.bento_radio_scanning else R.string.bento_radio_scan)
 
@@ -235,22 +252,24 @@ class BentoRadioActivity : BaseActivity() {
     private fun renderPresets() {
         val presets = radio.presets
         page.text = getString(R.string.bento_radio_page, currentPage + 1, PAGES)
+        val pink = UiTheme.color(this, R.attr.uiHighlight)
+        val soft = UiTheme.color(this, R.attr.uiTextSoft)
         presetViews.forEachIndexed { index, view ->
-            val preset = presets[currentPage * PER_PAGE + index]
+            val slot = currentPage * PER_PAGE + index
+            val preset = presets[slot]
             val freqView = view.findViewById<TextView>(R.id.preset_frequency)
             val nameView = view.findViewById<TextView>(R.id.preset_name)
+            nameView.text = getString(R.string.sw_preset_label, slot + 1)
             if (preset.isEmpty) {
                 freqView.text = "+"
                 freqView.alpha = 0.45f
-                nameView.setText(R.string.bento_radio_preset_empty)
                 view.isSelected = false
             } else {
                 freqView.text = TopwayRadio.format(radio.band, preset.frequency)
                 freqView.alpha = 1f
-                nameView.text = preset.name.ifBlank { TopwayRadio.unitOf(radio.band) }
                 view.isSelected = preset.frequency == radio.frequency
             }
+            nameView.setTextColor(if (view.isSelected) pink else soft)
         }
-        hint.setText(if (presets.all { it.isEmpty }) R.string.bento_radio_scan_hint else R.string.tv_radio_hint)
     }
 }

@@ -33,10 +33,58 @@
         android:paddingTop="4dp"
         android:paddingBottom="8dp">
 
-        <com.google.android.material.button.MaterialButtonToggleGroup
-            android:id="@+id/settingsTabGroup"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+        <!-- Which phone system's settings: Android Auto (the tiers on the right) or Apple CarPlay -->
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/settingsSectionGroup"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.5"
+            app:singleSelection="true"
+            app:selectionRequired="true">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/sectionAndroidAuto"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingLeft="6dp"
+                android:paddingRight="6dp"
+                android:text="@string/settings_section_android_auto" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/sectionCarPlay"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingLeft="6dp"
+                android:paddingRight="6dp"
+                android:text="@string/settings_section_carplay" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/sectionThemes"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingLeft="6dp"
+                android:paddingRight="6dp"
+                android:text="@string/settings_section_themes" />
+
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/settingsTabGroup"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="16dp"
             app:singleSelection="true"
             app:selectionRequired="true">
 
@@ -57,6 +105,8 @@
                 android:text="@string/settings_tab_advanced" />
 
         </com.google.android.material.button.MaterialButtonToggleGroup>
+
+        </LinearLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/settingsSearchLayout"

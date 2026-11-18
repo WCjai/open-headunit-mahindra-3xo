@@ -31,6 +31,9 @@
     <usb-device class="255" subclass="255" protocol="0" />
 
     <usb-device class="255" subclass="66" protocol="1" />   <!-- ADB -->
+
+    <!-- iPhone: handed to CarPlay (CarPlayLauncher), never switched to Android Auto. -->
+    <usb-device vendor-id="1452" />
     <usb-device class="6" subclass="1" protocol="1" />      <!-- PTP -->
     <usb-device class="224" subclass="1" protocol="3" />    <!-- RNDIS tethering -->
     <usb-device class="239" subclass="4" protocol="1" />    <!-- IAD -->

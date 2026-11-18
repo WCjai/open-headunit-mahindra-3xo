@@ -114,6 +114,41 @@
         android:supportsRtl="true"
         tools:ignore="GoogleAppIndexingWarning">
 
+        <!--
+            Apple CarPlay (carplay/ui, DiPlay). Its screens merge in from the library manifest;
+            these entries adapt them to Open Headunit:
+            - DiPlay's own settings activity stays in the code but is never shown: no launcher icon,
+              not exported, and every way into it goes to this app's home or settings instead
+              (OpenHeadunitBridge.hostScreenIntent).
+            - The CarPlay screen loses its own USB filter: UsbAttachedActivity is the single USB
+              entry point and hands iPhones to it (CarPlayLauncher), so the OS never shows a
+              chooser between two activities of this app.
+            - BYD-only parts (cluster screen, dashboard-map service, widget, wheel-zoom accessibility,
+              boot autostart, Car App Library service), DiPlay's USB-dialog accessibility service and
+              its self-update file provider are removed.
+        -->
+        <activity
+            android:name="com.shilapi.xcertplay.DiPlayActivity"
+            android:exported="false"
+            tools:replace="android:exported">
+            <intent-filter tools:node="removeAll" />
+        </activity>
+        <activity android:name="com.shilapi.xcertplay.CarPlayHostActivity">
+            <intent-filter tools:node="removeAll" />
+            <meta-data
+                android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
+                tools:node="remove" />
+        </activity>
+        <activity android:name="com.shilapi.xcertplay.AdbClusterActivity" tools:node="remove" />
+        <service android:name="com.shilapi.xcertplay.MapEmbedService" tools:node="remove" />
+        <service android:name="com.shilapi.xcertplay.WheelKeyService" tools:node="remove" />
+        <receiver android:name="com.shilapi.xcertplay.NavigationWidget" tools:node="remove" />
+        <receiver android:name="com.shilapi.xcertplay.BootReceiver" tools:node="remove" />
+        <service android:name="com.shilapi.xcertplay.shared.MyCarAppService" tools:node="remove" />
+        <service android:name="com.shilapi.xcertplay.UsbAutoConfirmService" tools:node="remove" />
+        <provider android:name="com.shilapi.xcertplay.update.UpdateApkProvider" tools:node="remove" />
+        <meta-data android:name="androidx.car.app.minCarApiLevel" tools:node="remove" />
+
         <activity
             android:name=".aap.AapProjectionActivity"
             android:configChanges="uiMode|orientation|screenSize|screenLayout|smallestScreenSize|keyboard|keyboardHidden|navigation"
@@ -256,6 +291,18 @@
             android:exported="false"
             android:launchMode="singleTask"
             android:taskAffinity="com.andrerinas.openheadunit.bento.radio"
+            android:theme="@style/AppTheme" />
+
+        <activity
+            android:name=".main.bento.SoundActivity"
+            android:configChanges="keyboardHidden|uiMode|orientation|screenSize"
+            android:exported="false"
+            android:theme="@style/AppTheme" />
+
+        <activity
+            android:name=".main.bento.MoreAppsActivity"
+            android:configChanges="keyboardHidden|uiMode|orientation|screenSize"
+            android:exported="false"
             android:theme="@style/AppTheme" />
 
         <activity

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The home's Apple CarPlay card, beside the Android Auto one and in the same style. The whole card is
+    the button: it opens CarPlay for a plugged-in iPhone (or says "No device found"), and goes back to
+    CarPlay while it runs. CarPlayHomeCard paints the status under the logo.
+-->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/carplay_card"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="?attr/uiCardBg"
+    android:foreground="?attr/uiCardPress"
+    android:clickable="true"
+    android:focusable="true"
+    android:contentDescription="@string/carplay_title"
+    android:padding="10dp">
+
+    <LinearLayout style="@style/SwCardHeader">
+
+        <TextView
+            style="@style/SwText.Header"
+            android:text="@string/carplay_title" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/carplay_scope"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="8dp"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp">
+
+        <FrameLayout
+            android:layout_width="150dp"
+            android:layout_height="150dp">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="?attr/uiLogoGlow" />
+
+            <View
+                android:id="@+id/carplay_pulse"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="6dp"
+                android:background="?attr/uiAvatarRing"
+                android:visibility="invisible" />
+
+            <ImageView
+                android:id="@+id/carplay_logo"
+                android:layout_width="120dp"
+                android:layout_height="128dp"
+                android:layout_gravity="center"
+                android:importantForAccessibility="no"
+                app:srcCompat="@drawable/sw_ic_carplay"
+                app:tint="?attr/uiIconIdle" />
+
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/carplay_title"
+            style="@style/SwText.Big"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:gravity="center"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textColor="@color/tv_white"
+            android:textSize="17sp"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/carplay_subtitle"
+            style="@style/SwText.Label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:gravity="center"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textColor="?attr/uiTextIce"
+            android:textSize="14sp"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    The tvOS home's Android Auto card. It carries every id of view_home_primary_card, so HomeFragment's
-    connection logic, countdown and fit keep driving it unchanged; the "tv" tag tells
-    HomeUiHelper.applyPrimaryCard to paint it in the glass style (paintTvCard).
+    The home's Android Auto card in the synthwave style (ui/Head Unit UI Mock.html). It keeps every id
+    of view_home_primary_card, so HomeFragment's connection logic, countdown and fit keep driving it;
+    the "tv" tag tells HomeUiHelper.applyPrimaryCard to paint it (paintTvCard).
 
-    Header: "Android Auto" and a chip with the connection (Cable, Wireless). Middle: a ringed phone,
-    which pulses green while a phone is connected, the title and the subtitle. Bottom: the one
-    action, full width.
+    The whole card is the button (connect, or back to Android Auto). Header: "Android Auto". Middle:
+    the Android Auto logo in the grid panel with the status under it. Cancel shows only while a
+    connection is on its way.
 -->
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -14,29 +14,25 @@
     android:id="@+id/home_primary_card"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/tv_card_bg"
+    android:background="?attr/uiCardBg"
     android:tag="tv"
-    android:focusable="true">
+    android:foreground="?attr/uiCardPress"
+    android:clickable="true"
+    android:focusable="true"
+    android:contentDescription="@string/tv_android_auto">
 
     <LinearLayout
         android:id="@+id/home_primary_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:gravity="center_horizontal"
-        android:paddingLeft="26dp"
-        android:paddingRight="26dp"
-        android:paddingTop="20dp"
-        android:paddingBottom="22dp">
+        android:padding="10dp">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="24dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+        <LinearLayout style="@style/SwCardHeader">
 
             <TextView
-                style="@style/TvText.Kicker"
+                android:id="@+id/tv_aa_label"
+                style="@style/SwText.Header"
                 android:text="@string/tv_android_auto" />
 
             <View
@@ -46,90 +42,80 @@
 
             <LinearLayout
                 android:id="@+id/tv_aa_chip"
-                android:layout_width="wrap_content"
-                android:layout_height="24dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:background="@drawable/tv_pill_bg"
-                android:paddingLeft="10dp"
-                android:paddingRight="11dp">
+                style="@style/SwChip"
+                android:visibility="gone">
 
                 <ImageView
                     android:id="@+id/tv_aa_chip_icon"
-                    android:layout_width="13dp"
-                    android:layout_height="13dp"
-                    android:layout_marginRight="6dp"
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
+                    android:layout_marginRight="3dp"
                     android:importantForAccessibility="no"
-                    app:srcCompat="@drawable/ic_usb_white" />
+                    app:srcCompat="@drawable/ic_usb_white"
+                    app:tint="?attr/uiTextSoft" />
 
                 <TextView
                     android:id="@+id/home_primary_kicker"
-                    style="@style/TvText"
-                    android:maxLines="1"
-                    android:textSize="12sp"
-                    android:fontFamily="@font/inter_semibold" />
+                    style="@style/SwText.Chip" />
 
             </LinearLayout>
 
         </LinearLayout>
 
+        <!-- The grid panel; HomeUiHelper.paintTvCard gives it its ScopeDrawable -->
         <LinearLayout
+            android:id="@+id/tv_aa_scope"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
+            android:layout_marginTop="8dp"
             android:orientation="vertical"
-            android:gravity="center">
+            android:gravity="center"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp">
 
-            <!-- The ring: a faint outer circle, the ring proper, its pulse, and the disc with the phone
-                 (or the reconnect countdown) in it. -->
             <FrameLayout
-                android:layout_width="148dp"
-                android:layout_height="148dp"
-                android:layout_marginBottom="12dp">
+                android:layout_width="150dp"
+                android:layout_height="150dp">
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/tv_ring_faint" />
-
-                <View
-                    android:id="@+id/tv_aa_pulse"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_margin="8dp"
-                    android:background="@drawable/tv_ring_pulse"
-                    android:visibility="invisible" />
-
+                <!-- A soft cyan glow behind the logo -->
                 <View
                     android:id="@+id/tv_aa_ring"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_margin="8dp"
-                    android:background="@drawable/tv_ring_bg" />
+                    android:background="?attr/uiLogoGlow" />
+
+                <!-- Breathes out while a phone is projecting -->
+                <View
+                    android:id="@+id/tv_aa_pulse"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="6dp"
+                    android:background="?attr/uiAvatarRing"
+                    android:visibility="invisible" />
 
                 <FrameLayout
                     android:id="@+id/tv_aa_disc"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_margin="16dp"
-                    android:background="@drawable/tv_disc_glass">
+                    android:layout_height="match_parent">
 
                     <ImageView
                         android:id="@+id/tv_aa_icon"
-                        android:layout_width="50dp"
-                        android:layout_height="50dp"
+                        android:layout_width="118dp"
+                        android:layout_height="118dp"
                         android:layout_gravity="center"
                         android:importantForAccessibility="no"
-                        app:srcCompat="@drawable/tv_ic_phone" />
+                        app:srcCompat="@drawable/sw_ic_android_auto"
+                        app:tint="?attr/uiIconIdle" />
 
                     <TextView
                         android:id="@+id/home_countdown"
+                        style="@style/SwText.Clock"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:gravity="center"
-                        android:fontFamily="@font/inter_light"
-                        android:textColor="@color/tv_white"
-                        android:textSize="44sp"
+                        android:textColor="?attr/uiHighlight"
+                        android:textSize="64sp"
                         android:visibility="gone" />
 
                 </FrameLayout>
@@ -138,44 +124,45 @@
 
             <TextView
                 android:id="@+id/home_primary_title"
-                style="@style/TvText"
+                style="@style/SwText.Big"
                 android:layout_width="match_parent"
-                android:gravity="center"
-                android:maxLines="2"
-                android:ellipsize="end"
-                android:textSize="26sp"
-                android:fontFamily="@font/inter_semibold"
-                android:letterSpacing="-0.02" />
-
-            <TextView
-                android:id="@+id/home_primary_subtitle"
-                style="@style/TvText"
-                android:layout_width="match_parent"
-                android:layout_marginTop="7dp"
-                android:gravity="center"
-                android:maxLines="2"
-                android:ellipsize="end"
-                android:textSize="15sp"
-                android:fontFamily="@font/inter_medium"
-                android:textColor="@color/tv_white_70" />
-
-            <TextView
-                android:id="@+id/home_primary_detail"
-                style="@style/TvText"
-                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:gravity="center"
                 android:maxLines="1"
                 android:ellipsize="end"
-                android:textSize="13sp"
-                android:textColor="@color/tv_white_60"
+                android:textColor="@color/tv_white"
+                android:textSize="17sp" />
+
+            <TextView
+                android:id="@+id/home_primary_subtitle"
+                style="@style/SwText.Label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:gravity="center"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="?attr/uiTextIce"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/home_primary_detail"
+                style="@style/SwText.Label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:gravity="center"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textSize="12sp"
                 android:visibility="gone" />
 
             <LinearLayout
                 android:id="@+id/home_primary_progress"
-                android:layout_width="220dp"
+                android:layout_width="180dp"
                 android:layout_height="5dp"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="8dp"
                 android:orientation="horizontal"
                 android:importantForAccessibility="no"
                 android:visibility="gone">
@@ -207,49 +194,50 @@
             android:id="@+id/home_primary_actions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/home_primary_action"
+                style="@style/SwButton"
+                android:visibility="gone"
                 android:layout_width="0dp"
-                android:layout_height="54dp"
+                android:layout_height="48dp"
                 android:layout_weight="1"
-                android:gravity="center"
                 android:maxLines="1"
                 android:ellipsize="end"
-                android:paddingLeft="12dp"
-                android:paddingRight="12dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:background="@drawable/tv_wide_glass_btn_bg"
-                android:fontFamily="@font/inter_semibold"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:includeFontPadding="false"
                 android:textColor="@color/tv_white"
-                android:textSize="16sp" />
+                android:textSize="15sp"
+                android:shadowColor="?attr/uiShadow"
+                android:shadowDx="1"
+                android:shadowDy="1"
+                android:shadowRadius="1" />
 
             <TextView
                 android:id="@+id/home_primary_cancel"
+                style="@style/SwButton.Text"
                 android:layout_width="wrap_content"
-                android:layout_height="54dp"
-                android:layout_marginLeft="10dp"
-                android:gravity="center"
-                android:maxLines="1"
-                android:paddingLeft="22dp"
-                android:paddingRight="22dp"
+                android:layout_height="48dp"
+                android:layout_marginLeft="8dp"
+                android:background="?attr/uiBtnBg"
                 android:clickable="true"
                 android:focusable="true"
-                android:background="@drawable/tv_wide_glass_btn_bg"
+                android:gravity="center"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
                 android:text="@string/cancel"
-                android:fontFamily="@font/inter_semibold"
-                android:textColor="@color/tv_white"
-                android:textSize="16sp"
+                android:textSize="17sp"
                 android:visibility="gone" />
 
         </LinearLayout>
 
     </LinearLayout>
 
-    <!-- Painted and hidden by the shared helpers; the tvOS card shows its own icon and the top bar
-         already shows the time. Kept so those helpers find what they look for. -->
+    <!-- Painted and hidden by the shared helpers; this card shows its own logo. Kept so those
+         helpers find what they look for. -->
     <FrameLayout
         android:layout_width="0dp"
         android:layout_height="0dp"

@@ -12,6 +12,7 @@ import androidx.core.content.ContextCompat
 import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.R
 import com.andrerinas.openheadunit.aap.AapService
+import com.andrerinas.openheadunit.carplay.CarPlayLauncher
 import com.andrerinas.openheadunit.connection.AutoConnectHoldPolicy
 import com.andrerinas.openheadunit.connection.CommManager
 import com.andrerinas.openheadunit.connection.ConnectionArbiter
@@ -81,6 +82,20 @@ class UsbAttachedActivity : Activity() {
         super.onCreate(savedInstanceState)
 
         AppLog.i("USB Intent: $intent")
+
+        // An iPhone goes to CarPlay. Android Auto keeps the port when it already runs a session,
+        // and CarPlay needs credential storage, so a locked boot waits for the service's scan.
+        DeviceIntent(intent).device?.takeIf { CarPlayLauncher.isIphone(it) }?.let { iphone ->
+            val locked = !(getSystemService(Context.USER_SERVICE) as UserManager).isUserUnlocked
+            when {
+                locked -> AppLog.i("CarPlay: iPhone attached before unlock; the service scan opens CarPlay later")
+                App.provide(this).commManager.isConnected ->
+                    AppLog.i("CarPlay: iPhone attached while Android Auto runs; not opening CarPlay")
+                else -> CarPlayLauncher.onIphoneAttached(this, iphone, "USB attach")
+            }
+            finish()
+            return
+        }
 
         val device = resolveUsbDevice(intent)
         if (device == null || !UsbDeviceCompat.isAndroidDevice(device)) {

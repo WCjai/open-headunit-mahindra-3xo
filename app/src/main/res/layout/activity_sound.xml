@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The car's sound processor (SoundActivity, TopwaySound), in the synthwave style. It shapes every
+    source the car plays: Bluetooth, radio, Android Auto and CarPlay.
+
+    Equalizer: the presets, then bass, middle and treble, each with its centre frequency.
+    Zone: balance and fader, subwoofer and loudness. The rows are added in code.
+-->
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.andrerinas.openheadunit.main.synthwave.SynthwaveBackdropView
+        android:id="@+id/sw_backdrop"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:importantForAccessibility="no" />
+
+    <include layout="@layout/view_sw_screen_header" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="18dp"
+        android:layout_marginRight="18dp"
+        android:layout_marginTop="76dp"
+        android:layout_marginBottom="14dp"
+        android:orientation="horizontal"
+        android:baselineAligned="false">
+
+        <LinearLayout
+            android:id="@+id/sound_eq_card"
+            style="@style/SwCard"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1.35">
+
+            <LinearLayout style="@style/SwCardHeader">
+                <TextView
+                    style="@style/SwText.Header"
+                    android:text="@string/sound_equalizer" />
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
+                <TextView
+                    android:id="@+id/sound_reset"
+                    style="@style/SwText.Chip"
+                    android:layout_height="26dp"
+                    android:background="?attr/uiChipBg"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
+                    android:text="@string/sound_reset" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/sound_presets"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:orientation="vertical" />
+
+            <LinearLayout
+                android:id="@+id/sound_bands"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_marginTop="8dp"
+                android:orientation="vertical"
+                android:paddingLeft="14dp"
+                android:paddingRight="14dp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/sound_zone_card"
+            style="@style/SwCard"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginLeft="14dp">
+
+            <LinearLayout style="@style/SwCardHeader">
+                <TextView
+                    style="@style/SwText.Header"
+                    android:text="@string/sound_zone" />
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
+                <TextView
+                    android:id="@+id/sound_centre"
+                    style="@style/SwText.Chip"
+                    android:layout_height="26dp"
+                    android:background="?attr/uiChipAccentBg"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
+                    android:text="@string/sound_centre"
+                    android:textColor="?attr/uiAccent" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/sound_zone"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_marginTop="8dp"
+                android:orientation="vertical"
+                android:paddingLeft="14dp"
+                android:paddingRight="14dp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Over both cards while the processor has not answered, or is not one this screen drives -->
+    <LinearLayout
+        android:id="@+id/sound_notice"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="64dp"
+        android:background="#CC0A0414"
+        android:clickable="true"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/sound_notice_text"
+            style="@style/SwText.Label"
+            android:layout_width="560dp"
+            android:gravity="center"
+            android:maxLines="4"
+            android:textColor="@color/tv_white"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/sound_open_topway"
+            style="@style/SwButton.Text"
+            android:layout_width="wrap_content"
+            android:layout_height="52dp"
+            android:layout_marginTop="18dp"
+            android:background="?attr/uiBtnBg"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:paddingLeft="24dp"
+            android:paddingRight="24dp"
+            android:text="@string/sound_open_topway"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+</FrameLayout>

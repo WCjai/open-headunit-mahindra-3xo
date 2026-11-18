@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Glass look's accents (UiTheme.Glass); the rest reuses the tv_* colours in tvos.xml -->
+<resources>
+    <color name="gl_accent">#FFFFFFFF</color>
+    <color name="gl_live">#FF86EFAC</color>
+    <color name="gl_highlight">#FF7CB8FF</color>
+</resources>

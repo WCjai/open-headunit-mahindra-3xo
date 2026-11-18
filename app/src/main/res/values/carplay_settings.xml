@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Head Unit Settings: the Android Auto / Apple CarPlay tabs, and the CarPlay tab's rows (CarPlaySettingsSection). -->
+<resources>
+    <string name="settings_section_android_auto">Android Auto</string>
+    <string name="settings_section_carplay">Apple CarPlay</string>
+
+    <string name="cp_category_connection">Connection</string>
+    <string name="cp_category_picture">Picture</string>
+    <string name="cp_category_sound">Sound and calls</string>
+    <string name="cp_category_trouble">Troubleshooting</string>
+
+    <string name="cp_info_next_connection">Changes apply the next time the iPhone connects. Unplug it and plug it back in to apply them now.</string>
+    <string name="cp_info_no_identity">This build has no CarPlay identity, so an iPhone cannot start CarPlay. See carplay/README.md.</string>
+    <string name="cp_how_to_connect">How to connect</string>
+    <string name="cp_how_to_connect_value">Plug the iPhone into the unit with its cable. CarPlay opens by itself; the first time, allow USB access and the VPN, and tap Trust on the iPhone.</string>
+
+    <string name="cp_right_hand_drive">Right-hand drive</string>
+    <string name="cp_right_hand_drive_desc">Puts CarPlay\'s controls closer to the driver.</string>
+    <string name="cp_night_mode">Day and night look</string>
+    <string name="cp_night_follow_android">Follow the car</string>
+    <string name="cp_night_light_sensor">Follow the light sensor</string>
+    <string name="cp_night_day">Always day</string>
+    <string name="cp_night_night">Always night</string>
+    <string name="cp_size">Icon size</string>
+    <string name="cp_size_large">Large</string>
+    <string name="cp_size_medium">Medium</string>
+    <string name="cp_size_small">Small</string>
+    <string name="cp_size_custom">Custom (%1$d mm)</string>
+    <string name="cp_resolution">Resolution</string>
+    <string name="cp_resolution_value">%1$d%% of the screen</string>
+    <string name="cp_frame_rate">Frame rate</string>
+    <string name="cp_frame_rate_value">%1$d fps</string>
+    <string name="cp_hide_bars">Hide the system bars</string>
+    <string name="cp_hide_bars_desc">Hides the unit\'s status and navigation bars over CarPlay.</string>
+    <string name="cp_corners">Rounded corners</string>
+    <string name="cp_corners_off">Off</string>
+    <string name="cp_corners_value">%1$d dp</string>
+    <string name="cp_hevc">Efficient video (HEVC)</string>
+    <string name="cp_hevc_desc">Uses HEVC instead of H.264. Leave off unless the picture needs it.</string>
+    <string name="cp_smooth">Smooth video (experimental)</string>
+    <string name="cp_smooth_desc">Shows frames at an even pace. Scrolling can look smoother, but touches respond a little later.</string>
+    <string name="cp_low_latency">Low-latency decoding (experimental)</string>
+    <string name="cp_low_latency_desc">Shows each frame as soon as it is decoded. Turn it off if the picture breaks up or freezes.</string>
+
+    <string name="cp_nav_volume">Navigation voice volume</string>
+    <string name="cp_nav_volume_full">Full</string>
+    <string name="cp_nav_volume_value">%1$d dB</string>
+    <string name="cp_music_buffer">Music buffer</string>
+    <string name="cp_music_buffer_value">%1$d ms</string>
+    <string name="cp_audio_focus">Audio focus</string>
+    <string name="cp_audio_focus_desc">CarPlay music takes the car\'s audio focus. Turn it off if sound goes missing.</string>
+    <string name="cp_buffered_music">Buffered music (experimental)</string>
+    <string name="cp_buffered_music_desc">Apps that support it, such as Apple Music, send music ahead so short gaps are not heard.</string>
+    <string name="cp_drop_bluetooth">Disconnect the car\'s Bluetooth during CarPlay</string>
+    <string name="cp_drop_bluetooth_desc">When the iPhone asks, the car\'s Bluetooth lets go of it while CarPlay runs, so calls come through CarPlay and the caller is heard. It reconnects when CarPlay ends. Off: the iPhone stays on the car\'s Bluetooth, and a call is only heard if you pick Bluetooth for its audio on the iPhone.</string>
+    <string name="cp_echo">Call echo cancellation (experimental)</string>
+    <string name="cp_echo_desc">Tries to reduce speaker echo the other person hears during CarPlay calls.</string>
+    <string name="cp_voice">Clearer call voices (experimental)</string>
+    <string name="cp_voice_desc">Cuts bass from CarPlay call audio.</string>
+
+    <string name="cp_fps_counter">Frame counter</string>
+    <string name="cp_fps_counter_desc">Shows frames per second in a corner of CarPlay.</string>
+    <string name="cp_debug_logs">Detailed CarPlay logs</string>
+    <string name="cp_debug_logs_desc">Writes more detail to the CarPlay log, for a report.</string>
+    <string name="cp_report">Save a CarPlay report</string>
+    <string name="cp_report_desc">CarPlay\'s state, settings and recent log, saved to Downloads/OpenHeadunit.</string>
+    <string name="cp_report_saving">Saving the CarPlay report…</string>
+    <string name="cp_report_saved">CarPlay report saved: %1$s</string>
+    <string name="cp_report_failed">The CarPlay report could not be saved: %1$s</string>
+</resources>

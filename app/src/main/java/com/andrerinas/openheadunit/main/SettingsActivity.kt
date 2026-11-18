@@ -261,6 +261,12 @@ class SettingsActivity : BaseActivity() {
          * user would otherwise arrive at a list that does not contain the row they were sent for.
          */
         const val EXTRA_SEARCH_QUERY = "extra_search_query"
+
+        /** Which settings to open on: [SECTION_ANDROID_AUTO] (the default) or [SECTION_CARPLAY]. */
+        const val EXTRA_SECTION = "extra_section"
+        const val SECTION_ANDROID_AUTO = "android_auto"
+        const val SECTION_CARPLAY = "carplay"
+        const val SECTION_THEMES = "themes"
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {

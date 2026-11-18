@@ -54,6 +54,14 @@ class App : Application(), Application.ActivityLifecycleCallbacks {
         } catch (e: Exception) {
             AppLog.w("App", "Could not apply the car defaults", e)
         }
+        // CarPlay (DiPlay) starts wireless by default; this car is USB only.
+        try {
+            com.andrerinas.openheadunit.carplay.CarPlayLauncher.applyCarDefaultsOnce(
+                this, com.andrerinas.openheadunit.utils.Settings(this).rightHandDrive)
+        } catch (e: Exception) {
+            AppLog.w("App", "Could not apply the CarPlay defaults", e)
+        }
+        com.andrerinas.openheadunit.carplay.CarPlaySession.install(this)
 
         try {
             val packageReceiver = object : BroadcastReceiver() {

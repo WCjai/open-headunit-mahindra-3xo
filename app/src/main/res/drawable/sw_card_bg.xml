@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The glass card: a light-to-purple wash, a soft highlight from the top left and a pink edge.
+     The frosted sunset under it is drawn by SynthwaveBackdropView. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item><shape><corners android:radius="14dp" />
+        <gradient android:angle="315" android:startColor="#29FFFFFF" android:centerColor="#0AFFFFFF" android:endColor="#47280E3C" /></shape></item>
+    <item><shape><corners android:radius="14dp" />
+        <gradient android:angle="315" android:startColor="#26FFFFFF" android:centerX="0.3" android:centerColor="#00FFFFFF" android:endColor="#00FFFFFF" /></shape></item>
+    <item><shape><corners android:radius="14dp" /><stroke android:width="1.5dp" android:color="#BFFF8CC8" /></shape></item>
+</layer-list>

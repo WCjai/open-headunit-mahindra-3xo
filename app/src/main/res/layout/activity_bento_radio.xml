@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    The car's FM/AM radio in the tvOS style (ui/tvos_dashboard.html's radio, with the tuner's real
-    controls): Home on the left, the band and AF / TA / Scan / power on the right; the station large
-    with a tuning dial and seek buttons; saved stations in a glass card. Sized for 1280x480.
+    The car's radio in the synthwave style (ui/Head Unit UI Mock.html, "Radio").
+
+    Tuner: the band and power in its header; seek down, the frequency in big pink figures and seek up;
+    the printed scale (drag along it to tune); FM, AM and Scan under it. Presets: six stations a page
+    (three pages per band), tap to tune, hold to store the playing frequency there.
 -->
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -10,357 +12,301 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.andrerinas.openheadunit.main.bento.TvAmbientView
+    <com.andrerinas.openheadunit.main.synthwave.SynthwaveBackdropView
+        android:id="@+id/sw_backdrop"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:importantForAccessibility="no" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/tv_veil" />
+    <include layout="@layout/view_sw_screen_header" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:paddingLeft="22dp"
-        android:paddingRight="22dp"
-        android:paddingTop="14dp"
-        android:paddingBottom="20dp">
+        android:layout_marginLeft="18dp"
+        android:layout_marginRight="18dp"
+        android:layout_marginTop="76dp"
+        android:layout_marginBottom="14dp"
+        android:orientation="horizontal"
+        android:baselineAligned="false">
 
-        <!-- Top bar -->
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="50dp">
-
-            <LinearLayout
-                android:id="@+id/bento_back"
-                android:layout_width="wrap_content"
-                android:layout_height="46dp"
-                android:layout_gravity="center_vertical|left"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingLeft="12dp"
-                android:paddingRight="18dp"
-                android:background="@drawable/tv_glass_btn_bg"
-                android:clickable="true"
-                android:focusable="true"
-                android:contentDescription="@string/tv_back_to_home">
-
-                <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:importantForAccessibility="no"
-                    app:srcCompat="@drawable/tv_ic_chevron_left" />
-
-                <TextView
-                    style="@style/TvText"
-                    android:layout_marginLeft="6dp"
-                    android:text="@string/tv_home"
-                    android:textSize="16sp"
-                    android:fontFamily="@font/inter_medium" />
-
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/radio_title"
-                style="@style/TvText.Kicker"
-                android:layout_gravity="center"
-                android:text="@string/tv_radio_fm_title" />
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical|right"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="42dp"
-                    android:orientation="horizontal"
-                    android:padding="3dp"
-                    android:background="@drawable/tv_pill_bg">
-
-                    <TextView
-                        android:id="@+id/radio_band_fm"
-                        style="@style/TvGlassButton.Text"
-                        android:layout_height="match_parent"
-                        android:background="@drawable/tv_segment_bg"
-                        android:fontFamily="@font/inter_bold"
-                        android:text="@string/bento_radio_fm" />
-
-                    <TextView
-                        android:id="@+id/radio_band_am"
-                        style="@style/TvGlassButton.Text"
-                        android:layout_height="match_parent"
-                        android:layout_marginLeft="2dp"
-                        android:background="@drawable/tv_segment_bg"
-                        android:fontFamily="@font/inter_bold"
-                        android:text="@string/bento_radio_am" />
-
-                </LinearLayout>
-
-                <TextView
-                    android:id="@+id/radio_af"
-                    style="@style/TvGlassButton.Text"
-                    android:layout_marginLeft="10dp"
-                    android:background="@drawable/tv_glass_btn_bg"
-                    android:text="@string/bento_radio_af" />
-
-                <TextView
-                    android:id="@+id/radio_ta"
-                    style="@style/TvGlassButton.Text"
-                    android:layout_marginLeft="10dp"
-                    android:background="@drawable/tv_glass_btn_bg"
-                    android:text="@string/bento_radio_ta" />
-
-                <TextView
-                    android:id="@+id/radio_scan"
-                    style="@style/TvGlassButton.Text"
-                    android:layout_marginLeft="10dp"
-                    android:background="@drawable/tv_glass_btn_bg"
-                    android:text="@string/bento_radio_scan" />
-
-                <ImageView
-                    android:id="@+id/radio_power"
-                    android:layout_width="46dp"
-                    android:layout_height="46dp"
-                    android:layout_marginLeft="10dp"
-                    android:padding="12dp"
-                    android:background="@drawable/tv_glass_circle_bg"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:contentDescription="@string/tv_radio_power"
-                    app:srcCompat="@drawable/tv_ic_power"
-                    app:tint="@color/tv_icon_on_glass" />
-
-            </LinearLayout>
-
-        </FrameLayout>
-
+        <!-- Tuner -->
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:layout_marginTop="14dp"
-            android:orientation="horizontal"
-            android:baselineAligned="false">
+            android:id="@+id/radio_tuner_card"
+            style="@style/SwCard"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1.45">
 
-            <!-- Now playing: frequency, station, dial, seek -->
-            <LinearLayout
-                android:id="@+id/radio_tuner"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:paddingRight="10dp">
+            <LinearLayout style="@style/SwCardHeader">
+
+                <TextView
+                    style="@style/SwText.Header"
+                    android:text="@string/sw_tuner" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
 
                 <TextView
                     android:id="@+id/radio_kicker"
-                    style="@style/TvText.Kicker"
-                    android:layout_width="match_parent"
-                    android:gravity="center"
-                    android:maxLines="1"
-                    android:ellipsize="end" />
+                    style="@style/SwText.Chip"
+                    android:layout_height="22dp"
+                    android:background="?attr/uiChipBg"
+                    android:paddingLeft="6dp"
+                    android:paddingRight="6dp" />
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:orientation="horizontal"
-                    android:baselineAligned="true">
-
-                    <TextView
-                        android:id="@+id/radio_frequency"
-                        style="@style/TvText"
-                        android:textSize="104sp"
-                        android:fontFamily="@font/inter_light"
-                        android:letterSpacing="-0.04" />
-
-                    <TextView
-                        android:id="@+id/radio_unit"
-                        style="@style/TvText"
-                        android:layout_marginLeft="10dp"
-                        android:textSize="26sp"
-                        android:textColor="@color/tv_white_50" />
-
-                </LinearLayout>
-
-                <TextView
-                    android:id="@+id/radio_station"
-                    style="@style/TvText"
-                    android:layout_width="match_parent"
-                    android:layout_marginTop="4dp"
-                    android:gravity="center"
-                    android:maxLines="1"
-                    android:ellipsize="end"
-                    android:textSize="21sp"
-                    android:fontFamily="@font/inter_medium"
-                    android:textColor="@color/tv_station_blue" />
-
-                <TextView
-                    android:id="@+id/radio_text"
-                    style="@style/TvText"
-                    android:layout_width="match_parent"
-                    android:layout_marginTop="6dp"
-                    android:gravity="center"
-                    android:textSize="14sp"
-                    android:textColor="@color/tv_white_60"
-                    android:singleLine="true"
-                    android:ellipsize="marquee"
-                    android:marqueeRepeatLimit="marquee_forever" />
-
-                <com.andrerinas.openheadunit.main.bento.TunerDialView
-                    android:id="@+id/radio_dial"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:minHeight="56dp"
-                    android:layout_marginTop="6dp"
-                    android:layout_marginLeft="24dp"
-                    android:layout_marginRight="24dp" />
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
+                <FrameLayout
+                    android:id="@+id/radio_power"
+                    style="@style/SwButton"
+                    android:layout_width="40dp"
+                    android:layout_height="30dp"
+                    android:layout_marginLeft="8dp"
+                    android:contentDescription="@string/tv_radio_power">
                     <ImageView
-                        android:id="@+id/radio_seek_down"
-                        android:layout_width="64dp"
-                        android:layout_height="56dp"
-                        android:padding="15dp"
-                        android:background="@drawable/tv_glass_btn_bg"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:contentDescription="@string/bento_radio_seek_down"
-                        app:srcCompat="@drawable/tv_ic_seek_back" />
-
-                    <ImageView
-                        android:id="@+id/radio_step_down"
-                        android:layout_width="52dp"
-                        android:layout_height="48dp"
-                        android:layout_marginLeft="16dp"
-                        android:padding="12dp"
-                        android:background="@drawable/tv_glass_btn_bg"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:contentDescription="@string/bento_radio_step_down"
-                        app:srcCompat="@drawable/tv_ic_chevron_left" />
-
-                    <ImageView
-                        android:id="@+id/radio_step_up"
-                        android:layout_width="52dp"
-                        android:layout_height="48dp"
-                        android:layout_marginLeft="16dp"
-                        android:padding="12dp"
-                        android:background="@drawable/tv_glass_btn_bg"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:contentDescription="@string/bento_radio_step_up"
-                        app:srcCompat="@drawable/tv_ic_chevron_right" />
-
-                    <ImageView
-                        android:id="@+id/radio_seek_up"
-                        android:layout_width="64dp"
-                        android:layout_height="56dp"
-                        android:layout_marginLeft="16dp"
-                        android:padding="15dp"
-                        android:background="@drawable/tv_glass_btn_bg"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:contentDescription="@string/bento_radio_seek_up"
-                        app:srcCompat="@drawable/tv_ic_seek_forward" />
-
-                </LinearLayout>
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_gravity="center"
+                        android:importantForAccessibility="no"
+                        app:srcCompat="@drawable/sw_ic_power" />
+                </FrameLayout>
 
             </LinearLayout>
 
-            <!-- Saved stations -->
             <LinearLayout
-                android:layout_width="440dp"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="12dp"
+                android:id="@+id/radio_tuner"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_marginTop="8dp"
                 android:orientation="vertical"
-                android:background="@drawable/tv_card_bg"
                 android:paddingLeft="18dp"
                 android:paddingRight="18dp"
-                android:paddingTop="14dp"
-                android:paddingBottom="12dp">
+                android:paddingTop="12dp"
+                android:paddingBottom="14dp">
 
                 <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="36dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <TextView
-                        style="@style/TvText.Kicker"
-                        android:text="@string/bento_radio_presets" />
-
-                    <View
-                        android:layout_width="0dp"
-                        android:layout_height="1dp"
-                        android:layout_weight="1" />
-
-                    <ImageView
-                        android:id="@+id/radio_page_prev"
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:padding="8dp"
-                        android:background="@drawable/tv_glass_btn_bg"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:contentDescription="@string/bento_previous"
-                        app:srcCompat="@drawable/tv_ic_chevron_left" />
-
-                    <TextView
-                        android:id="@+id/radio_page"
-                        style="@style/TvText"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="10dp"
-                        android:textSize="13sp"
-                        android:fontFamily="@font/inter_semibold"
-                        android:textColor="@color/tv_white_70" />
-
-                    <ImageView
-                        android:id="@+id/radio_page_next"
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:padding="8dp"
-                        android:background="@drawable/tv_glass_btn_bg"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:contentDescription="@string/bento_next"
-                        app:srcCompat="@drawable/tv_ic_chevron_right" />
-
-                </LinearLayout>
-
-                <!-- Filled by BentoRadioActivity: three rows of two -->
-                <LinearLayout
-                    android:id="@+id/radio_presets"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"
-                    android:layout_marginTop="10dp"
-                    android:orientation="vertical" />
+                    android:orientation="horizontal"
+                    android:gravity="center">
 
-                <TextView
-                    android:id="@+id/radio_hint"
-                    style="@style/TvText"
+                    <FrameLayout
+                        android:id="@+id/radio_seek_down"
+                        style="@style/SwButton"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:contentDescription="@string/bento_radio_seek_down">
+                        <ImageView
+                            android:layout_width="26dp"
+                            android:layout_height="26dp"
+                            android:layout_gravity="center"
+                            android:importantForAccessibility="no"
+                            app:srcCompat="@drawable/sw_ic_seek_back" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="22dp"
+                        android:layout_marginRight="22dp"
+                        android:minWidth="260dp"
+                        android:orientation="vertical"
+                        android:gravity="center_horizontal">
+
+                        <TextView
+                            android:id="@+id/radio_frequency"
+                            style="@style/SwText.Clock"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:includeFontPadding="false"
+                            android:textColor="?attr/uiHighlight"
+                            android:textSize="92sp"
+                            android:shadowColor="?attr/uiHighlightGlow"
+                            android:shadowDx="0"
+                            android:shadowDy="0"
+                            android:shadowRadius="22" />
+
+                        <TextView
+                            android:id="@+id/radio_unit"
+                            style="@style/SwText.Label"
+                            android:layout_marginTop="2dp"
+                            android:letterSpacing="0.2"
+                            android:textAllCaps="?attr/uiCaps"
+                            android:textColor="?attr/uiTextIce"
+                            android:textSize="16sp" />
+
+                        <TextView
+                            android:id="@+id/radio_station"
+                            style="@style/SwText.Label"
+                            android:layout_width="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:maxWidth="300dp"
+                            android:ellipsize="end"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:id="@+id/radio_text"
+                            style="@style/SwText.Label"
+                            android:layout_width="300dp"
+                            android:layout_marginTop="2dp"
+                            android:gravity="center"
+                            android:ellipsize="marquee"
+                            android:marqueeRepeatLimit="marquee_forever"
+                            android:singleLine="true"
+                            android:textColor="?attr/uiTextIce"
+                            android:textSize="12sp"
+                            android:visibility="invisible" />
+
+                    </LinearLayout>
+
+                    <FrameLayout
+                        android:id="@+id/radio_seek_up"
+                        style="@style/SwButton"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:contentDescription="@string/bento_radio_seek_up">
+                        <ImageView
+                            android:layout_width="26dp"
+                            android:layout_height="26dp"
+                            android:layout_gravity="center"
+                            android:importantForAccessibility="no"
+                            app:srcCompat="@drawable/sw_ic_seek_fwd" />
+                    </FrameLayout>
+
+                </LinearLayout>
+
+                <com.andrerinas.openheadunit.main.synthwave.TunerScaleView
+                    android:id="@+id/radio_dial"
                     android:layout_width="match_parent"
-                    android:layout_marginTop="8dp"
-                    android:gravity="center"
-                    android:text="@string/tv_radio_hint"
-                    android:textSize="12sp"
-                    android:textColor="@color/tv_white_50" />
+                    android:layout_height="64dp"
+                    android:layout_marginTop="10dp" />
 
             </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/radio_band_fm"
+                    style="@style/SwButton.Text"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="?attr/uiBtnBg"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:text="@string/sw_fm_label" />
+
+                <TextView
+                    android:id="@+id/radio_band_am"
+                    style="@style/SwButton.Text"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_marginLeft="8dp"
+                    android:background="?attr/uiBtnBg"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:text="@string/sw_am_label" />
+
+                <TextView
+                    android:id="@+id/radio_scan"
+                    style="@style/SwButton.Text"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1.6"
+                    android:layout_marginLeft="8dp"
+                    android:background="?attr/uiBtnBg"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Presets -->
+        <LinearLayout
+            android:id="@+id/radio_presets_card"
+            style="@style/SwCard"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginLeft="14dp">
+
+            <LinearLayout style="@style/SwCardHeader">
+
+                <TextView
+                    style="@style/SwText.Header"
+                    android:text="@string/sw_presets" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
+
+                <FrameLayout
+                    android:id="@+id/radio_page_prev"
+                    style="@style/SwButton"
+                    android:layout_width="30dp"
+                    android:layout_height="28dp"
+                    android:contentDescription="@string/bento_radio_page_prev">
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_gravity="center"
+                        android:importantForAccessibility="no"
+                        app:srcCompat="@drawable/sw_ic_chevron_left" />
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/radio_page"
+                    style="@style/SwText.Label"
+                    android:layout_width="42dp"
+                    android:gravity="center"
+                    android:textSize="13sp" />
+
+                <FrameLayout
+                    android:id="@+id/radio_page_next"
+                    style="@style/SwButton"
+                    android:layout_width="30dp"
+                    android:layout_height="28dp"
+                    android:layout_marginRight="10dp"
+                    android:contentDescription="@string/bento_radio_page_next">
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_gravity="center"
+                        android:rotation="180"
+                        android:importantForAccessibility="no"
+                        app:srcCompat="@drawable/sw_ic_chevron_left" />
+                </FrameLayout>
+
+                <TextView
+                    style="@style/SwText.Chip"
+                    android:layout_height="22dp"
+                    android:background="?attr/uiChipBg"
+                    android:paddingLeft="6dp"
+                    android:paddingRight="6dp"
+                    android:text="@string/sw_hold_to_save" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/radio_presets"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_marginTop="8dp"
+                android:orientation="vertical" />
 
         </LinearLayout>
 

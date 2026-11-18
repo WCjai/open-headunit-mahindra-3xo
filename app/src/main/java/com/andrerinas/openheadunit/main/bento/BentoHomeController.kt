@@ -4,38 +4,43 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
-import android.graphics.Color
-import android.net.ConnectivityManager
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
-import android.text.format.DateFormat
 import android.view.KeyEvent
 import android.view.View
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.core.widget.ImageViewCompat
 import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.R
+import com.andrerinas.openheadunit.main.theme.UiTheme
+import com.andrerinas.openheadunit.carplay.CarPlayHomeCard
+import com.andrerinas.openheadunit.carplay.CarPlayLauncher
 import com.andrerinas.openheadunit.connection.CommManager
 import com.andrerinas.openheadunit.connection.carkey.topway.TopwayBluetooth
 import com.andrerinas.openheadunit.connection.carkey.topway.TopwayMusicBridge
 import com.andrerinas.openheadunit.connection.carkey.topway.TopwayRadio
 import com.andrerinas.openheadunit.main.SettingsActivity
+import com.andrerinas.openheadunit.main.synthwave.SynthwaveBackdropView
+import com.andrerinas.openheadunit.main.synthwave.Synthwave
+import com.andrerinas.openheadunit.main.synthwave.TunerScaleView
 import com.andrerinas.openheadunit.utils.AppLog
+import com.andrerinas.openheadunit.utils.HomeUiHelper
 import com.andrerinas.openheadunit.utils.ToastUtils
-import java.util.Date
 
 /**
- * Everything on the tvOS home except the Android Auto card, which HomeFragment drives itself.
+ * Everything on the synthwave home except the Android Auto card, which HomeFragment drives itself.
  *
- *  - Top bar: the menu (Android Settings, Head Unit Settings, TopWay's Bluetooth app), time, date,
- *    and whether a phone is on the car's Bluetooth and the unit on Wi-Fi.
+ *  - Top bar: the menu (Android Settings, Head Unit Settings, TopWay's Bluetooth app, CarPlay
+ *    settings), time, date, and whether a phone is on the car's Bluetooth and the unit on Wi-Fi.
  *  - Now Playing: Android Auto's song while a phone projects; else the car's radio while it plays;
  *    else the phone's Bluetooth audio; else a hint to connect a phone.
- *  - Tiles: App Library (every app) and Radio.
+ *  - Apple CarPlay: [CarPlayHomeCard].
+ *  - Tiles: More Apps (hold for every app) and Radio, with the tuned frequency on its scale.
  *  - A call on the car's Bluetooth while nothing projects: a call card over the home.
  *    [TopwayForegroundKeeper] brings the home back over the unit's own phone screen.
  */
@@ -59,10 +64,12 @@ class BentoHomeController(
     private val radio = TopwayRadio.get(context)
     private val main = Handler(Looper.getMainLooper())
 
-    private val clock: TextView = root.findViewById(R.id.bento_clock)
-    private val date: TextView = root.findViewById(R.id.bento_date)
-    private val statusBt: ImageView = root.findViewById(R.id.bento_status_bt)
-    private val statusWifi: ImageView = root.findViewById(R.id.bento_status_wifi)
+    private val topBar = Synthwave.TopBar(
+        clock = root.findViewById(R.id.bento_clock),
+        date = root.findViewById(R.id.bento_date),
+        bluetooth = root.findViewById(R.id.bento_status_bt),
+        wifi = root.findViewById(R.id.bento_status_wifi),
+    )
     private val menuButton: View = root.findViewById(R.id.bento_menu_button)
     private val menuScrim: View = root.findViewById(R.id.bento_menu_scrim)
     private val menu: View = root.findViewById(R.id.bento_menu)
@@ -71,8 +78,15 @@ class BentoHomeController(
     private val musicChip: View = root.findViewById(R.id.bento_music_chip)
     private val musicSourceIcon: ImageView = root.findViewById(R.id.bento_music_source_icon)
     private val musicSource: TextView = root.findViewById(R.id.bento_music_source)
-    private val musicTitle: TextView = root.findViewById(R.id.bento_music_title)
+    /** A long title scrolls across the card (marquee); [setTitle] keeps it from restarting on every update. */
+    private val musicTitle: TextView = root.findViewById<TextView>(R.id.bento_music_title).apply {
+        // Marquee runs only on a single-line view; single-line drops the theme's capitals, so put them back.
+        setSingleLine(true)
+        isAllCaps = UiTheme.caps(context)
+        isSelected = true
+    }
     private val musicArtist: TextView = root.findViewById(R.id.bento_music_artist)
+    private val musicState: TextView = root.findViewById(R.id.bento_music_state)
     private val musicArt: ImageView = root.findViewById(R.id.bento_music_art)
     private val musicArtIcon: ImageView = root.findViewById(R.id.bento_music_art_icon)
     private val progressRow: View = root.findViewById(R.id.bento_music_progress_row)
@@ -85,6 +99,11 @@ class BentoHomeController(
     private val nextButton: View = root.findViewById(R.id.bento_music_next)
     private val playIcon: ImageView = root.findViewById(R.id.bento_music_play_icon)
 
+    private val radioScale: TunerScaleView = root.findViewById(R.id.bento_radio_scale)
+    private val radioAm: View = root.findViewById(R.id.bento_radio_am)
+    private val radioFm: View = root.findViewById(R.id.bento_radio_fm)
+    private val radioLevel: View = root.findViewById(R.id.bento_radio_level)
+
     /**
      * The radio was turned off from the Now Playing card. The card keeps showing it, switched off,
      * so the same button turns it back on, until the home is left or something else plays.
@@ -93,9 +112,11 @@ class BentoHomeController(
 
     private val callOverlay: View = root.findViewById(R.id.bento_call_overlay)
     private val callAvatar: TextView = root.findViewById(R.id.bento_call_avatar)
+    private val callRing: View = root.findViewById(R.id.bento_call_ring)
     private val callState: TextView = root.findViewById(R.id.bento_call_state)
     private val callName: TextView = root.findViewById(R.id.bento_call_name)
     private val callNumber: TextView = root.findViewById(R.id.bento_call_number)
+    private val callChip: TextView = root.findViewById(R.id.bento_call_chip)
     private val callAnswer: View = root.findViewById(R.id.bento_call_answer)
     private val callHangupLabel: TextView = root.findViewById(R.id.bento_call_hangup_label)
 
@@ -109,12 +130,14 @@ class BentoHomeController(
         renderAll()
     }
     private val nowPlayingListener: () -> Unit = { renderMusic() }
-    private val radioListener: () -> Unit = { renderMusic() }
+    private val radioListener: () -> Unit = {
+        renderMusic()
+        renderRadioTile()
+    }
 
     private val clockTick = object : Runnable {
         override fun run() {
-            renderClock()
-            renderStatus()
+            topBar.render()
             main.postDelayed(this, CLOCK_TICK_MS)
         }
     }
@@ -127,6 +150,18 @@ class BentoHomeController(
     }
 
     fun onViewCreated() {
+        // Frosted glass under every card, and the grid panels inside them.
+        root.findViewById<SynthwaveBackdropView>(R.id.bento_backdrop)?.frost(
+            musicCard,
+            root.findViewById(R.id.home_primary_card),
+            root.findViewById(R.id.carplay_card),
+            root.findViewById(R.id.bento_tile_more),
+            root.findViewById(R.id.bento_tile_radio),
+        )
+        root.findViewById<SynthwaveBackdropView>(R.id.bento_call_backdrop)?.fullBlur = true
+        Synthwave.scope(root.findViewById(R.id.bento_music_scope))
+        Synthwave.scope(root.findViewById(R.id.bento_call_scope))
+
         menuButton.setOnClickListener { if (menuScrim.visibility == View.VISIBLE) closeMenu() else openMenu() }
         menuScrim.setOnClickListener { closeMenu() }
         root.findViewById<View>(R.id.bento_menu_android_settings).setOnClickListener {
@@ -142,17 +177,23 @@ class BentoHomeController(
             openTopwayBluetooth(musicPage = false)
         }
         root.findViewById<View>(R.id.bento_tile_radio).setOnClickListener { BentoRadioActivity.open(context) }
-        root.findViewById<View>(R.id.bento_tile_more).setOnClickListener { openAppDrawer() }
-        root.findViewById<View>(R.id.bento_music_card).setOnClickListener { onMusicCardClicked() }
-        root.findViewById<View>(R.id.bento_music_prev).setOnClickListener { mediaAction(MediaAction.PREVIOUS) }
-        root.findViewById<View>(R.id.bento_music_play).setOnClickListener { mediaAction(MediaAction.PLAY_PAUSE) }
-        root.findViewById<View>(R.id.bento_music_next).setOnClickListener { mediaAction(MediaAction.NEXT) }
+        root.findViewById<View>(R.id.bento_tile_more).apply {
+            setOnClickListener { MoreAppsActivity.open(context) }
+            // Every installed app, as the old App Library tile showed.
+            setOnLongClickListener { openAppDrawer(); true }
+        }
+        musicCard.setOnClickListener { onMusicCardClicked() }
+        prevButton.setOnClickListener { mediaAction(MediaAction.PREVIOUS) }
+        playButton.setOnClickListener { mediaAction(MediaAction.PLAY_PAUSE) }
+        nextButton.setOnClickListener { mediaAction(MediaAction.NEXT) }
+        CarPlayHomeCard.bind(root) { onCarPlayAction() }
         callAnswer.setOnClickListener { callBridge.answer() }
         root.findViewById<View>(R.id.bento_call_hangup).setOnClickListener { callBridge.endCall() }
 
         listOf(
-            R.id.bento_music_card, R.id.bento_tile_radio, R.id.bento_tile_more,
+            R.id.bento_music_card, R.id.bento_tile_radio, R.id.bento_tile_more, R.id.carplay_card, R.id.home_primary_card,
             R.id.bento_music_prev, R.id.bento_music_play, R.id.bento_music_next, R.id.bento_menu_button,
+            R.id.bento_call_answer, R.id.bento_call_hangup,
         ).forEach { id -> root.findViewById<View>(id)?.let { BentoUi.addPressFeedback(it, focusScale = 1.02f) } }
 
         TopwayForegroundKeeper.start(context)
@@ -191,46 +232,18 @@ class BentoHomeController(
         if (AaNowPlaying.onChanged === nowPlayingListener) AaNowPlaying.onChanged = null
     }
 
-    /** Called by HomeFragment whenever the connection state it watches changes. */
+    /** Called by HomeFragment whenever the connection state it watches changes, CarPlay's included. */
     fun onConnectionChanged() = renderAll()
 
     private fun renderAll() {
-        renderClock()
-        renderStatus()
+        topBar.render()
         renderMusic()
+        renderRadioTile()
+        CarPlayHomeCard.paint(context, root)
         renderCall()
     }
 
-    private fun renderClock() {
-        val now = Date()
-        clock.text = DateFormat.getTimeFormat(context).format(now)
-        date.text = DateFormat.format("EEE, d MMM", now)
-    }
-
-    // --- Top bar ------------------------------------------------------------------------------
-
-    private fun renderStatus() {
-        if (callBridge.isAvailable) {
-            val on = callBridge.moduleConnected
-            statusBt.visibility = View.VISIBLE
-            statusBt.alpha = if (on) 1f else DIM_ALPHA
-            statusBt.contentDescription = context.getString(if (on) R.string.tv_bt_on else R.string.tv_bt_off)
-        } else {
-            statusBt.visibility = View.GONE
-        }
-        val wifi = wifiConnected()
-        statusWifi.setImageResource(if (wifi) R.drawable.tv_ic_wifi else R.drawable.tv_ic_wifi_off)
-        statusWifi.alpha = if (wifi) 1f else DIM_ALPHA
-        statusWifi.contentDescription = context.getString(if (wifi) R.string.tv_wifi_on else R.string.tv_wifi_off)
-    }
-
-    @Suppress("DEPRECATION") // getNetworkInfo(TYPE_WIFI) is the one call that works from API 16 up.
-    private fun wifiConnected(): Boolean = try {
-        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
-        cm?.getNetworkInfo(ConnectivityManager.TYPE_WIFI)?.isConnected == true
-    } catch (e: Exception) {
-        false
-    }
+    // --- Top bar menu -------------------------------------------------------------------------
 
     private fun openMenu() {
         menuScrim.visibility = View.VISIBLE
@@ -251,6 +264,23 @@ class BentoHomeController(
             .setDuration(MENU_ANIM_MS).withEndAction { menuScrim.visibility = View.GONE }.start()
     }
 
+    // --- Apple CarPlay ------------------------------------------------------------------------
+
+    private fun onCarPlayAction() {
+        // Back to CarPlay while it runs; CarPlay for a plugged-in iPhone; else "No device found".
+        CarPlayLauncher.connectOverUsb(context)
+    }
+
+    // --- Radio tile ---------------------------------------------------------------------------
+
+    private fun renderRadioTile() {
+        val range = radio.range
+        radioScale.setTuning(range.min, range.max, range.step, !radio.isFm, radio.frequency)
+        radioAm.alpha = if (radio.isFm) DIM_ALPHA else 1f
+        radioFm.alpha = if (radio.isFm) 1f else DIM_ALPHA
+        radioLevel.alpha = if (radio.isPlaying) 1f else DIM_ALPHA
+    }
+
     // --- Now Playing --------------------------------------------------------------------------
 
     private enum class Source { ANDROID_AUTO, RADIO, BLUETOOTH, NONE }
@@ -262,10 +292,17 @@ class BentoHomeController(
         else -> Source.NONE
     }
 
+    /** Sets the song title only when it changed: setting it again would send a scrolling title back to the start. */
+    private fun setTitle(text: CharSequence) {
+        if (musicTitle.text?.toString() != text.toString()) musicTitle.text = text
+        musicTitle.isSelected = true
+    }
+
     private fun renderMusic() {
         if (projecting()) radioOffFromCard = false
-        musicArtIcon.setImageResource(R.drawable.tv_ic_music)
-        musicChip.visibility = View.VISIBLE
+        musicArtIcon.setImageResource(R.drawable.sw_ic_music)
+        // No chip in the card's corner: the source reads in the centre line (setState).
+        musicChip.visibility = View.GONE
         musicControls.alpha = 1f
         val source = source()
         // The card itself opens only screens of this app: Android Auto or the radio. On Bluetooth
@@ -278,47 +315,62 @@ class BentoHomeController(
         prevButton.visibility = if (radioCard) View.GONE else View.VISIBLE
         nextButton.visibility = if (radioCard) View.GONE else View.VISIBLE
         val lit = !radioCard || radio.isPlaying
-        playButton.setBackgroundResource(if (lit) R.drawable.tv_white_circle_bg else R.drawable.tv_disc_glass)
-        ImageViewCompat.setImageTintList(playIcon, ColorStateList.valueOf(if (lit) Color.BLACK else Color.WHITE))
+        playButton.isSelected = lit
+        ImageViewCompat.setImageTintList(playIcon, ColorStateList.valueOf(
+            if (lit) UiTheme.color(context, R.attr.uiHighlight) else ContextCompat.getColor(context, R.color.tv_white)))
         playButton.contentDescription = context.getString(if (radioCard) R.string.tv_radio_power else R.string.tv_play_pause)
         when (source) {
             Source.ANDROID_AUTO -> {
-                setChip(R.drawable.tv_ic_phone, context.getString(R.string.tv_source_aa))
-                musicTitle.text = AaNowPlaying.title.ifBlank { context.getString(R.string.tv_nothing_playing) }
+                setChip(R.drawable.sw_ic_android_auto, context.getString(R.string.tv_source_aa))
+                setTitle(AaNowPlaying.title.ifBlank { context.getString(R.string.tv_nothing_playing) })
                 musicArtist.text = AaNowPlaying.artist
                 showArt(AaNowPlaying.albumArt)
-                playIcon.setImageResource(if (AaNowPlaying.isPlaying) R.drawable.tv_ic_pause else R.drawable.tv_ic_play)
+                playIcon.setImageResource(if (AaNowPlaying.isPlaying) R.drawable.sw_ic_pause else R.drawable.sw_ic_play)
+                setState(if (AaNowPlaying.isPlaying) R.string.sw_playing else R.string.sw_paused)
             }
             Source.RADIO -> {
-                setChip(R.drawable.tv_ic_radio_outline, TopwayRadio.bandName(radio.band))
-                musicTitle.text = context.getString(R.string.bento_radio_frequency,
-                    TopwayRadio.format(radio.band, radio.frequency), TopwayRadio.unitOf(radio.band))
+                setChip(R.drawable.sw_ic_radio, TopwayRadio.bandName(radio.band))
+                setTitle(context.getString(R.string.bento_radio_frequency,
+                    TopwayRadio.format(radio.band, radio.frequency), TopwayRadio.unitOf(radio.band)))
                 musicArtist.text = if (radio.isPlaying) radio.stationName.ifBlank { radio.radioText }
                     else context.getString(R.string.tv_radio_off)
                 showArt(null)
-                musicArtIcon.setImageResource(R.drawable.tv_ic_radio_outline)
+                musicArtIcon.setImageResource(R.drawable.sw_ic_radio)
                 // The tuner has no pause, so its one button turns it on and off.
-                playIcon.setImageResource(R.drawable.tv_ic_power)
+                playIcon.setImageResource(R.drawable.sw_ic_power)
+                setState(if (radio.isPlaying) R.string.sw_playing else null)
             }
             Source.BLUETOOTH -> {
-                setChip(R.drawable.tv_ic_bluetooth, context.getString(R.string.tv_source_bt))
-                musicTitle.text = songText(music.title).ifBlank { context.getString(R.string.tv_source_bt) }
+                setChip(R.drawable.sw_ic_bluetooth, context.getString(R.string.tv_source_bt))
+                setTitle(songText(music.title).ifBlank { context.getString(R.string.tv_source_bt) })
                 musicArtist.text = songText(music.artist)
                 showArt(null)
                 // The unit reports no play state for Bluetooth audio, so one button does both.
-                playIcon.setImageResource(R.drawable.tv_ic_play_pause)
+                playIcon.setImageResource(R.drawable.sw_ic_play_pause)
+                setState(null)
             }
             Source.NONE -> {
-                musicChip.visibility = View.INVISIBLE
-                musicTitle.setText(R.string.tv_nothing_playing)
+                sourceLabel = ""
+                setTitle(context.getString(R.string.tv_nothing_playing))
                 musicArtist.setText(R.string.tv_connect_to_play)
                 showArt(null)
-                playIcon.setImageResource(R.drawable.tv_ic_play)
+                playIcon.setImageResource(R.drawable.sw_ic_play)
                 musicControls.alpha = DIM_ALPHA
+                setState(null)
             }
         }
         main.removeCallbacks(progressTick)
         if (renderProgress()) main.postDelayed(progressTick, PROGRESS_TICK_MS)
+    }
+
+    /** The centre line under the song: the source and, when known, whether it plays ("● Bluetooth · Playing"). */
+    private fun setState(text: Int?) {
+        val parts = listOfNotNull(
+            sourceLabel.takeIf { it.isNotBlank() },
+            text?.let { context.getString(it).removePrefix("● ") },
+        )
+        musicState.visibility = if (parts.isEmpty()) View.GONE else View.VISIBLE
+        musicState.text = "● " + parts.joinToString(" · ")
     }
 
     /**
@@ -331,9 +383,13 @@ class BentoHomeController(
             text.equals("<unknown>", ignoreCase = true)) "" else text
     }
 
+    /** The source's name, shown by [setState]. */
+    private var sourceLabel = ""
+
     private fun setChip(icon: Int, text: String) {
         musicSourceIcon.setImageResource(icon)
         musicSource.text = text
+        sourceLabel = text
     }
 
     /** Android Auto's elapsed and remaining time. True while it should keep ticking. */
@@ -372,14 +428,21 @@ class BentoHomeController(
         val state = callBridge.callState
         val show = state.inCall && !projecting()
         callOverlay.visibility = if (show) View.VISIBLE else View.GONE
-        if (!show) return
+        if (!show) {
+            HomeUiHelper.setPulse(callRing, false)
+            return
+        }
         val incoming = state == TopwayBluetooth.CallState.INCOMING
-        val stateText = context.getString(when (state) {
-            TopwayBluetooth.CallState.INCOMING -> R.string.bento_call_incoming
-            TopwayBluetooth.CallState.OUTGOING -> R.string.bento_call_outgoing
-            else -> R.string.bento_call_active
+        callState.setText(when (state) {
+            TopwayBluetooth.CallState.INCOMING -> R.string.sw_call_incoming
+            TopwayBluetooth.CallState.OUTGOING -> R.string.sw_call_outgoing
+            else -> R.string.sw_call_active
         })
-        callState.text = context.getString(R.string.tv_call_kicker, stateText)
+        callChip.setText(when (state) {
+            TopwayBluetooth.CallState.INCOMING -> R.string.sw_call_chip_incoming
+            TopwayBluetooth.CallState.OUTGOING -> R.string.sw_call_chip_outgoing
+            else -> R.string.sw_call_chip_active
+        })
         // The contact name when the phonebook knows the number; the number otherwise.
         val name = callBridge.callerName
         val number = callBridge.callerNumber
@@ -391,6 +454,14 @@ class BentoHomeController(
         callAvatar.text = if (initial != null && initial.isLetter()) initial.uppercaseChar().toString() else "#"
         callAnswer.visibility = if (incoming) View.VISIBLE else View.GONE
         callHangupLabel.setText(if (incoming) R.string.tv_decline else R.string.tv_end_call)
+        // The ring round the caller breathes while the phone rings, and stands still on a call.
+        HomeUiHelper.setPulse(callRing, incoming)
+        if (!incoming) {
+            callRing.visibility = View.VISIBLE
+            callRing.scaleX = 1f
+            callRing.scaleY = 1f
+            callRing.alpha = 0.8f
+        }
     }
 
     // --- Actions ------------------------------------------------------------------------------

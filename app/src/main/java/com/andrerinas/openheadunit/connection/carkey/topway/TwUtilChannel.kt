@@ -32,6 +32,12 @@ class TwUtilChannel(
      * (115200); null for the plain `open(short[])` every other TopWay app uses.
      */
     private val baud: Int? = null,
+    /**
+     * False for a send-only channel: opened without TWUtil's reader thread (`start`) or a handler,
+     * so it never takes a byte off the line. The Bluetooth module's serial port has one reader,
+     * com.tw.bt; a second reader steals its replies and can make it miss a call.
+     */
+    private val listen: Boolean = true,
 ) {
 
     companion object {
@@ -161,9 +167,9 @@ class TwUtilChannel(
 
         exemptTopwayClasses()
         logApiOnce(cls)
-        val worker = HandlerThread("TwUtil-$name").also { it.start() }
+        val worker = if (listen) HandlerThread("TwUtil-$name").also { it.start() } else null
         thread = worker
-        val handler = object : Handler(worker.looper) {
+        val handler = if (worker == null) null else object : Handler(worker.looper) {
             override fun handleMessage(msg: Message) {
                 // An odd message must never take the thread down with it.
                 try {
@@ -189,10 +195,13 @@ class TwUtilChannel(
                 stopThread()
                 return "not listening - TWUtil.open(${idList()}) returned $result"
             }
-            find(cls, "start")?.invoke(instance)
-            cls.getMethod("addHandler", String::class.java, Handler::class.java).invoke(instance, handlerTag, handler)
+            if (handler != null) {
+                find(cls, "start")?.invoke(instance)
+                cls.getMethod("addHandler", String::class.java, Handler::class.java).invoke(instance, handlerTag, handler)
+            }
             util = instance
-            AppLog.i("TwUtilChannel[$name]: open on ${idList()} with ${describeCtor(ctorArg ?: NO_ARG)}")
+            AppLog.i("TwUtilChannel[$name]: open on ${idList()} with ${describeCtor(ctorArg ?: NO_ARG)}" +
+                if (handler == null) ", send only" else "")
             return null
         } catch (e: Throwable) {
             val cause = e.cause ?: e
@@ -255,15 +264,17 @@ class TwUtilChannel(
         val instance = util
         util = null
         if (cls != null && instance != null) {
-            try {
-                find(cls, "removeHandler", String::class.java)?.invoke(instance, handlerTag)
-            } catch (e: Throwable) {
-                AppLog.w("TwUtilChannel[$name]: removeHandler failed: ${e.message}")
-            }
-            try {
-                find(cls, "stop")?.invoke(instance)
-            } catch (e: Throwable) {
-                AppLog.w("TwUtilChannel[$name]: stop failed: ${e.message}")
+            if (listen) {
+                try {
+                    find(cls, "removeHandler", String::class.java)?.invoke(instance, handlerTag)
+                } catch (e: Throwable) {
+                    AppLog.w("TwUtilChannel[$name]: removeHandler failed: ${e.message}")
+                }
+                try {
+                    find(cls, "stop")?.invoke(instance)
+                } catch (e: Throwable) {
+                    AppLog.w("TwUtilChannel[$name]: stop failed: ${e.message}")
+                }
             }
             closeQuietly(cls, instance)
         }

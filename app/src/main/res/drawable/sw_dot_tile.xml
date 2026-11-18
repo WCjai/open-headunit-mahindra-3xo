@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One square of the More Apps tile's grid, with a faint cyan halo -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item><shape><corners android:radius="9dp" /><solid android:color="#332DE2E6" /></shape></item>
+    <item android:left="3dp" android:top="3dp" android:right="3dp" android:bottom="3dp"><shape><corners android:radius="7dp" /><solid android:color="#FFE9FDFF" /></shape></item>
+</layer-list>

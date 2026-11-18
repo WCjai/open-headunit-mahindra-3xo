@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Now Playing song position: a white bar in a faint track -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@android:id/background"><shape><corners android:radius="3dp" /><solid android:color="#33FFFFFF" /></shape></item>
+    <item android:id="@android:id/progress"><clip><shape><corners android:radius="3dp" /><solid android:color="#FFFFFFFF" /></shape></clip></item>
+</layer-list>

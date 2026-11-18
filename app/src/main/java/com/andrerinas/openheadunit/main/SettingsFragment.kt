@@ -117,6 +117,10 @@ class SettingsFragment : Fragment() {
 
     // Basic/Advanced tab + search state (Feature A)
     private var settingsTabGroup: com.google.android.material.button.MaterialButtonToggleGroup? = null
+    /** The Apple CarPlay tab is showing instead of Android Auto's settings. */
+    private var carPlaySection = false
+    /** The Themes tab (ThemesSettingsSection): the look of the head-unit screens. */
+    private var themesSection = false
     private var searchInput: com.google.android.material.textfield.TextInputEditText? = null
     private var searchQuery: String = ""
     // The complete, unfiltered list built by updateSettingsList(); rendering filters this.
@@ -3028,6 +3032,30 @@ class SettingsFragment : Fragment() {
         settingsTabGroup = view.findViewById(R.id.settingsTabGroup)
         searchInput = view.findViewById(R.id.settingsSearch)
 
+        // Android Auto's settings or Apple CarPlay's. Opened from the home's CarPlay menu entry, the
+        // CarPlay tab shows first; otherwise Android Auto's, or the tab chosen before a sub-screen.
+        val sectionGroup = view.findViewById<com.google.android.material.button.MaterialButtonToggleGroup>(R.id.settingsSectionGroup)
+        activity?.intent?.getStringExtra(SettingsActivity.EXTRA_SECTION)?.let { requested ->
+            carPlaySection = requested == SettingsActivity.SECTION_CARPLAY
+            themesSection = requested == SettingsActivity.SECTION_THEMES
+            activity?.intent?.removeExtra(SettingsActivity.EXTRA_SECTION)
+        }
+        sectionGroup?.check(when {
+            carPlaySection -> R.id.sectionCarPlay
+            themesSection -> R.id.sectionThemes
+            else -> R.id.sectionAndroidAuto
+        })
+        sectionGroup?.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (!isChecked) return@addOnButtonCheckedListener
+            val carPlay = checkedId == R.id.sectionCarPlay
+            val themes = checkedId == R.id.sectionThemes
+            if (carPlay == carPlaySection && themes == themesSection) return@addOnButtonCheckedListener
+            carPlaySection = carPlay
+            themesSection = themes
+            settingsRecyclerView.scrollToPosition(0)
+            renderSettings()
+        }
+
         settingsTabGroup?.check(if (settings.isAdvancedSettingsActive) R.id.tabAdvanced else R.id.tabBasic)
         // The tab is a view choice and saves at once, so it never counts as an unsaved change.
         settingsTabGroup?.addOnButtonCheckedListener { _, checkedId, isChecked ->
@@ -3089,11 +3117,55 @@ class SettingsFragment : Fragment() {
     }
 
     private fun renderSettings(scrollState: android.os.Parcelable? = null) {
+        if (themesSection) {
+            // Themes have no tiers either; a choice saves at once.
+            settingsTabGroup?.visibility = View.INVISIBLE
+            val rows = com.andrerinas.openheadunit.main.settings.ThemesSettingsSection(requireContext()) {
+                if (isAdded && themesSection) renderSettings(settingsRecyclerView.layoutManager?.onSaveInstanceState())
+            }.items()
+            settingsAdapter.submitList(filterCarPlay(rows)) {
+                scrollState?.let { settingsRecyclerView.layoutManager?.onRestoreInstanceState(it) }
+            }
+            return
+        }
+        if (carPlaySection) {
+            // CarPlay has no Basic and Advanced tiers; its rows save at once.
+            settingsTabGroup?.visibility = View.INVISIBLE
+            val rows = com.andrerinas.openheadunit.main.settings.CarPlaySettingsSection(requireContext()) {
+                if (isAdded && carPlaySection) renderSettings(settingsRecyclerView.layoutManager?.onSaveInstanceState())
+            }.items()
+            settingsAdapter.submitList(filterCarPlay(rows)) {
+                scrollState?.let { settingsRecyclerView.layoutManager?.onRestoreInstanceState(it) }
+            }
+            return
+        }
+        settingsTabGroup?.visibility = View.VISIBLE
         // While searching, the tab has no effect (search spans both tiers), so hint that.
         settingsTabGroup?.isEnabled = searchQuery.isBlank()
         settingsAdapter.submitList(filterSettings(fullSettingsList)) {
             scrollState?.let { settingsRecyclerView.layoutManager?.onRestoreInstanceState(it) }
         }
+    }
+
+    /** The CarPlay rows matching the search box, each with its section's header. */
+    private fun filterCarPlay(rows: List<SettingItem>): List<SettingItem> {
+        val query = searchQuery.trim()
+        if (query.isEmpty()) return rows
+        val result = mutableListOf<SettingItem>()
+        var pendingHeader: SettingItem.CategoryHeader? = null
+        var headerMatches = false
+        for (item in rows) {
+            if (item is SettingItem.CategoryHeader) {
+                pendingHeader = item
+                headerMatches = getString(item.titleResId).contains(query, ignoreCase = true)
+                continue
+            }
+            if (headerMatches || searchableText(item).contains(query, ignoreCase = true)) {
+                pendingHeader?.let { result.add(it); pendingHeader = null }
+                result.add(item)
+            }
+        }
+        return result
     }
 
     // Filters the full list by active tab / search query, keeping category headers only when

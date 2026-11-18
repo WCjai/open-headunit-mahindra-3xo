@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The top of the Radio and More Apps screens (ui/Head Unit UI Mock.html): "‹ HOME" on the left, the
+    screen's name in the middle, the clock and the Bluetooth and Wi-Fi badges on the right.
+    The screen sets the title (sw_header_title) and binds Synthwave.TopBar to the rest.
+-->
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="52dp"
+    android:layout_marginLeft="22dp"
+    android:layout_marginRight="22dp"
+    android:layout_marginTop="12dp">
+
+    <TextView
+        android:id="@+id/bento_back"
+        style="@style/SwHomePill"
+        android:layout_gravity="center_vertical"
+        android:drawableLeft="@drawable/sw_ic_chevron_left_small" />
+
+    <TextView
+        android:id="@+id/sw_header_title"
+        style="@style/SwText.Header"
+        android:layout_gravity="center"
+        android:textSize="26sp" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="right"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/sw_header_clock"
+            style="@style/SwText.Clock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="16dp"
+            android:includeFontPadding="false"
+            android:textColor="@color/tv_white"
+            android:textSize="26sp" />
+
+        <ImageView
+            android:id="@+id/sw_header_bt"
+            style="@style/SwBadge"
+            app:srcCompat="@drawable/sw_ic_bluetooth" />
+
+        <ImageView
+            android:id="@+id/sw_header_wifi"
+            style="@style/SwBadge"
+            android:layout_marginLeft="10dp"
+            app:srcCompat="@drawable/sw_ic_wifi" />
+
+    </LinearLayout>
+
+</FrameLayout>

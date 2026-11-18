@@ -260,6 +260,11 @@ class HomeFragment : Fragment() {
         }
         setupListeners()
         if (bentoHome) {
+            // The synthwave home's Android Auto card is the button itself: connect, or back to Android Auto.
+            container.findViewById<View>(R.id.home_primary_card)?.apply {
+                isClickable = true
+                setOnClickListener { onPrimaryActionClicked() }
+            }
             bento = com.andrerinas.openheadunit.main.bento.BentoHomeController(
                 container, openAppDrawer = { openAppDrawer() }, openProjection = { openProjection() }
             ).also { it.onViewCreated() }
@@ -307,6 +312,13 @@ class HomeFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 AapService.scanningState.collect { renderHome() }
+            }
+        }
+
+        // A running CarPlay session takes over the phone card (CarPlayHomeCard).
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                com.andrerinas.openheadunit.carplay.CarPlaySession.active.collect { renderHome() }
             }
         }
 
@@ -821,7 +833,10 @@ class HomeFragment : Fragment() {
 
     private fun restoreCardLines(root: View, stepShown: Boolean) {
         listOf(R.id.home_primary_subtitle, R.id.home_primary_kicker, R.id.home_primary_title).forEach {
-            root.findViewById<View>(it)?.visibility = View.VISIBLE
+            // The synthwave card hides its status lines while idle (HomeUiHelper.paintTvCard).
+            root.findViewById<View>(it)?.let { line ->
+                line.visibility = if (line.getTag(R.id.sw_idle_hidden) == true) View.GONE else View.VISIBLE
+            }
         }
         root.findViewById<TextView>(R.id.home_primary_detail)?.let {
             it.visibility = if (stepShown && !it.text.isNullOrEmpty()) View.VISIBLE else View.GONE
@@ -1917,8 +1932,12 @@ class HomeFragment : Fragment() {
                     )
                 }
             }
+        } else if (androidDevices.isEmpty()) {
+            // Nothing to connect to: say so, rather than opening the device list on an empty screen.
+            AppLog.i("USB button: no Android phone attached")
+            ToastUtils.showToast(requireContext(), R.string.no_device_found, Toast.LENGTH_SHORT, force = true)
         } else {
-            // 0 or multiple devices - open the list
+            // Several phones: the list lets the driver pick one.
             val controller = findNavController()
             if (controller.currentDestination?.id == R.id.homeFragment) {
                 controller.navigate(R.id.action_homeFragment_to_usbListFragment)

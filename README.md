@@ -86,10 +86,10 @@ bridge, radio, steering wheel) will not work on them.
 
 | File | Use it when |
 |---|---|
-| `OpenHeadunit-3XO-<version>.apk` | **Production build.** Use this in the car. Optimised and signed with this project's release key, so later releases install as updates. |
-| `OpenHeadunit-3XO-<version>-debug.apk` | **Debug build.** For testing and bug reports. Same features, signed with a debug key. |
+| `OpenHeadunit-3XO-2.0.0.apk` | **2.0.0, with Apple CarPlay.** The build tested in the car. Signed with a debug key, so it does not install over the 1.0.0 production APK (see below). |
+| `OpenHeadunit-3XO-1.0.0.apk` | **1.0.0 production build** (Android Auto only). Optimised and signed with this project's release key. |
 
-Both builds use the same app id but different signatures, so Android will not install one over
+The two keys give different signatures for the same app id, so Android will not install one over
 the other. To switch, export your settings (**Head Unit Settings → Backup → Export settings**),
 uninstall the app, install the other APK and import the settings again.
 
